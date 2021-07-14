@@ -1,11 +1,10 @@
-import React from 'react';
-// import { Counter } from './features/counter/Counter';
-import { DrizzleContext } from "@drizzle/react-plugin";
-import { Drizzle } from "@drizzle/store";
-import drizzleOptions from "./drizzleOptions";
-import MyComponent from './components/myComponent'
+import React from 'react'
+import { DrizzleContext } from "@drizzle/react-plugin"
+import { Drizzle } from "@drizzle/store"
+import drizzleOptions from "./drizzleOptions"
+import { ViewDataComponent } from "./components/viewDataComponent"
 
-const drizzle = new Drizzle(drizzleOptions as any);
+const drizzle = new Drizzle(drizzleOptions as any)
 
 function App() {
   return (
@@ -19,7 +18,7 @@ function App() {
           }
 
           return (
-            <MyComponent drizzle={drizzle} drizzleState={drizzleState} />
+            <ViewDataComponent drizzle={drizzle} drizzleState={drizzleState} />
           )
         }}
       </DrizzleContext.Consumer>

@@ -1,17 +1,18 @@
 import Web3 from "web3"
-import piggyGameWithNFT from "./contracts/piggyGame.json"
-import profileNFT from "./contracts/WBProfileNFT.json"
-import rewardNFT from "./contracts/boosterNFT.json"
+import piggyGame from "./contracts/piggyGame.json"
+import WBProfileNFT from "./contracts/WBProfileNFT.json"
+import boosterNFT from "./contracts/boosterNFT.json"
+import PiggyBankToken from "./contracts/PiggyBankToken.json"
 
 const options = {
   web3: {
     block: false,
     customProvider: new Web3("ws://localhost:8545"),
   },
-  contracts: [piggyGameWithNFT, profileNFT, rewardNFT],
+  contracts: [PiggyBankToken],
   // events: {
   //   SimpleStorage: ["StorageSet"],
-  // },
+  // }, piggyGame, WBProfileNFT, boosterNFT, 
 }
 
 export default options
