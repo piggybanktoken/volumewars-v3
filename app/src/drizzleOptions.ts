@@ -9,10 +9,10 @@ const options = {
     block: false,
     customProvider: new Web3("ws://localhost:8545"),
   },
-  contracts: [PiggyBankToken],
+  contracts: [piggyGame],
   // events: {
   //   SimpleStorage: ["StorageSet"],
-  // }, piggyGame, WBProfileNFT, boosterNFT, 
+  // },
 }
 
 export default options
