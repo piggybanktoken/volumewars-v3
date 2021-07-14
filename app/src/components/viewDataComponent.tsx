@@ -61,12 +61,41 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
         />
       </div>
       <div>
-      {/* <ContractData
-            drizzle={drizzle}
-            drizzleState={drizzleState}
-            contract="piggyGame"
-            method="operator"
-          /> */}
+      <h2>Game</h2>
+      <h3>Owner</h3>
+        <ContractData
+          drizzle={drizzle}
+          drizzleState={drizzleState}
+          contract="piggyGame"
+          method="operator"
+        />
+      <h3>Set Game Pool Address</h3>
+        Example Address: 
+        <AccountData
+        drizzle={drizzle}
+        drizzleState={drizzleState}
+        accountIndex={0}
+        units="ether"
+        precision={3}
+        />
+      <ContractForm
+          drizzle={drizzle}
+          contract="piggyGame"
+          method="setGamePoolFundAddress"
+          labels={["Game Pool Address"]}
+        />
+      <h3>Deposit Tokens</h3>
+      <p>
+        Example amount: 
+        1000000000000000
+      </p>
+      
+        <ContractForm
+          drizzle={drizzle}
+          contract="piggyGame"
+          method="deposit"
+          labels={["Amount to Deposit"]}
+        />
       </div>
       </div>
   )

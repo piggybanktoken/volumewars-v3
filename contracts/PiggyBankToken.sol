@@ -7,7 +7,7 @@ contract PiggyBankToken is ERC20 {
     string public name = "PiggyBankToken";
     string public symbol = "PIGGY";
     uint256 public decimals = 5;
-    uint256 public INITIAL_SUPPLY = 10000000000000;
+    uint256 public INITIAL_SUPPLY = 100000000000000000000000000;
 
     constructor() public {
         _mint(msg.sender, INITIAL_SUPPLY);
