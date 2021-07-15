@@ -34,3 +34,7 @@ export async function approve(spender: string, amount: string): Promise<boolean>
     const piggy = getContract()
     return await piggy.approve(spender, amount)
 }
+export async function transfer(recipient: string, amount: string): Promise<boolean> {
+    const piggy = getContract()
+    return await piggy.transfer(recipient, amount)
+}
