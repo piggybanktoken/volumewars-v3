@@ -6,8 +6,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 
 export const tokenAddress = '0xcd2ecd5e06b1a330789b30e8ada3d11c51503a71'
 const decimals = 9
-const chainId = ChainId.MAINNET
-export const PIGGY = new Token(chainId, tokenAddress, decimals, "PIGGY")
+export const PIGGY = new Token(ChainId.MAINNET, tokenAddress, decimals, "PIGGY")
 
 function getContract(): ethers.Contract {
     const wprovider = new JsonRpcProvider("http://localhost:8545")
