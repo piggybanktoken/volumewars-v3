@@ -5,7 +5,7 @@ import { Contract } from '@ethersproject/contracts'
 import { BigNumber } from '@ethersproject/bignumber'
 
 
-export const gameAddress = '0xBaf55e29E296C2aCAcc78A85bc2709Ff5Ed59005'
+export const gameAddress = '0x458c0D2b159521AB35ab327a7D53675003892a67'
 
 function getContract(): ethers.Contract {
     const wprovider = new JsonRpcProvider("http://localhost:8545")
