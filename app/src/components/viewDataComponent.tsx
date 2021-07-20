@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { newContextComponents } from "@drizzle/react-components";
 import { Drizzle } from "@drizzle/store";
 import { buyTokensAPI, PANCAKE_ROUTER_V2 } from "../app/swap";
-import { balanceOf, approve, tokenAddress } from "../app/piggy";
+import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
+import  { deposit } from '../app/piggyGame'
+import { gameAddress } from "../app/piggyGame";
+import { Button, Checkbox, Form } from 'semantic-ui-react'
 
 const { AccountData, ContractData, ContractForm } = newContextComponents;
 
@@ -12,7 +15,7 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
   async function buyAndApproveTokens() {
     await buyTokensAPI(1, drizzleState["accounts"][0] as any)
     const balance = await getPiggyBalance()
-    await approve("0xBb7F1B497A1444A9833bC789CED74A2a73067DD0", balance)
+    await approve(gameAddress, balance)
   }
   async function getPiggyBalance(): Promise<string> {
     const balance = await balanceOf(drizzleState["accounts"][0])
@@ -24,7 +27,6 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
     const stackId = game.methods.updateTestSwapRouter.cacheSend(PANCAKE_ROUTER_V2, tokenAddress, {"from": drizzleState["accounts"][0], "gas": 999999})
     const stackId2 = game.methods.setGamePoolFundAddress.cacheSend(drizzleState["accounts"][2], {"from": drizzleState["accounts"][0], "gas": 999999})
   }
-  
   useEffect(() =>{
     getPiggyBalance()
   },[])
@@ -38,10 +40,13 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
         units="ether"
         precision={3}
         />
-        <button onClick={buyAndApproveTokens}>Buy Tokens and Approve</button>
+        <Button onClick={buyAndApproveTokens}>Buy Tokens and Approve</Button>
         <br></br>
         <h3>Current Balance: {piggyBalance} $PIGGY </h3>
-        <button onClick={initialSettings}>Game Setup</button>
+        <Button onClick={initialSettings}>Game Setup</Button>
+        <Button onClick={() => {transfer(gameAddress, "514394565612698262").then(() => getPiggyBalance())}}>Send Piggy</Button>
+        <Button onClick={() => {deposit("514394565612698262").then(() => getPiggyBalance())}} >Deposit</Button>
+        <Button onClick={() => {balanceOf(gameAddress).then((res) => console.log(res))}} >Get Game Balance</Button>
         <div className="section">
       </div>
       <div>
@@ -68,8 +73,7 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
         Example amount: 
         1000000000000000
       </p>
-      
-        <ContractForm
+        <Form.Field as={ContractForm}
           drizzle={drizzle}
           contract="piggyGame"
           method="deposit"
