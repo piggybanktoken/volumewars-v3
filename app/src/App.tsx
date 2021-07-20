@@ -5,6 +5,7 @@ import drizzleOptions from "./drizzleOptions"
 import { ViewDataComponent } from "./components/viewDataComponent"
 import { TestComponent } from "./components/testComponent"
 import { Dashboard } from "./components/Dashboard"
+import { NFTCollection } from "./components/nftCollection"
 import { War } from "./components/war"
 import { TopBar } from "./components/topBar"
 import { Button, Image, Search, Grid, Container, Dropdown, Segment, Divider, Icon, Label, Sidebar, Menu, Header } from 'semantic-ui-react'
@@ -57,6 +58,13 @@ function App() {
             </Menu.Item>
             </Link>
 
+            <Link to="/nfts" onClick={closeMenu}>
+              <Menu.Item as='a'>
+                NFT Collection
+            </Menu.Item>
+            </Link>
+
+
 
 
           </Sidebar>
@@ -73,6 +81,10 @@ function App() {
               <Route path="/war">
                 <War />
               </Route>
+              <Route path="/nfts">
+                <NFTCollection />
+              </Route>
+
 
 
             </Switch>

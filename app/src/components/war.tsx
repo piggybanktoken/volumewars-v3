@@ -43,7 +43,7 @@ export function War() {
     }
     const [attackSize, setSize] = useState(0)
     const [attackTarget, setTarget] = useState(0)
-    const [modalState, setModalState] = React.useState(AttackState.Closed)
+    const [modalState, setModalState] = useState(AttackState.Closed)
     const teams = [1, 2, 3, 4, 5]
     const nteams = 5
 

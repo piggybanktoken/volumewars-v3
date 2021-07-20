@@ -38,3 +38,34 @@ found 0 vulnerabilities
     {"projectName":"/dev/null/inferredProject1*","typeAcquisition":{"enable":true,"include":[],"exclude":[]},"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typings":[],"unresolvedImports":[],"kind":"action::set"}
 [16:32:46.539] Response has been sent.
 [16:32:46.539] No new typings were requested as a result of typings discovery
+[20:28:15.357] Got install request {"projectName":"/dev/null/inferredProject2*","fileNames":[],"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typeAcquisition":{"enable":true,"include":[],"exclude":[]},"unresolvedImports":[],"projectRootPath":"/home/kahr/Code/VolumeWars/app/src/components","kind":"discover"}
+[20:28:15.367] Explicitly included types: []
+[20:28:15.373] Inferred typings from unresolved imports: []
+[20:28:15.373] Result: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/kahr/Code/VolumeWars/app/src/components/bower_components","/home/kahr/Code/VolumeWars/app/src/components/node_modules"]}
+[20:28:15.373] Finished typings discovery: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/kahr/Code/VolumeWars/app/src/components/bower_components","/home/kahr/Code/VolumeWars/app/src/components/node_modules"]}
+[20:28:15.375] DirectoryWatcher:: Added:: WatchInfo: /home/kahr/Code/VolumeWars/app/src/components/bower_components
+[20:28:15.376] DirectoryWatcher:: Added:: WatchInfo: /home/kahr/Code/VolumeWars/app/src/components/node_modules
+[20:28:15.376] Sending response:
+    {"projectName":"/dev/null/inferredProject2*","typeAcquisition":{"enable":true,"include":[],"exclude":[]},"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typings":[],"unresolvedImports":[],"kind":"action::set"}
+[20:28:15.377] Response has been sent.
+[20:28:15.377] No new typings were requested as a result of typings discovery
+[20:49:50.824] Got install request {"projectName":"/dev/null/inferredProject3*","fileNames":[],"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typeAcquisition":{"enable":true,"include":[],"exclude":[]},"unresolvedImports":[],"projectRootPath":"/home/kahr/Code/VolumeWars/app/src/features","kind":"discover"}
+[20:49:50.824] Explicitly included types: []
+[20:49:50.824] Inferred typings from unresolved imports: []
+[20:49:50.824] Result: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/kahr/Code/VolumeWars/app/src/features/bower_components","/home/kahr/Code/VolumeWars/app/src/features/node_modules"]}
+[20:49:50.825] Finished typings discovery: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/kahr/Code/VolumeWars/app/src/features/bower_components","/home/kahr/Code/VolumeWars/app/src/features/node_modules"]}
+[20:49:50.825] DirectoryWatcher:: Added:: WatchInfo: /home/kahr/Code/VolumeWars/app/src/features/bower_components
+[20:49:50.831] DirectoryWatcher:: Added:: WatchInfo: /home/kahr/Code/VolumeWars/app/src/features/node_modules
+[20:49:50.832] Sending response:
+    {"projectName":"/dev/null/inferredProject3*","typeAcquisition":{"enable":true,"include":[],"exclude":[]},"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typings":[],"unresolvedImports":[],"kind":"action::set"}
+[20:49:50.832] Response has been sent.
+[20:49:50.832] No new typings were requested as a result of typings discovery
+[20:50:48.757] Got install request {"projectName":"/dev/null/inferredProject2*","fileNames":[],"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typeAcquisition":{"enable":true,"include":[],"exclude":[]},"unresolvedImports":[],"projectRootPath":"/home/kahr/Code/VolumeWars/app/src/components","kind":"discover"}
+[20:50:48.758] Explicitly included types: []
+[20:50:48.758] Inferred typings from unresolved imports: []
+[20:50:48.758] Result: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/kahr/Code/VolumeWars/app/src/components/bower_components","/home/kahr/Code/VolumeWars/app/src/components/node_modules"]}
+[20:50:48.758] Finished typings discovery: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/kahr/Code/VolumeWars/app/src/components/bower_components","/home/kahr/Code/VolumeWars/app/src/components/node_modules"]}
+[20:50:48.762] Sending response:
+    {"projectName":"/dev/null/inferredProject2*","typeAcquisition":{"enable":true,"include":[],"exclude":[]},"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true},"typings":[],"unresolvedImports":[],"kind":"action::set"}
+[20:50:48.762] Response has been sent.
+[20:50:48.762] No new typings were requested as a result of typings discovery
