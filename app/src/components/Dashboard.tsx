@@ -1,23 +1,10 @@
 import React, { useState } from "react";
 import { Grid, Button, Label, Header, Container } from 'semantic-ui-react'
+import { BalanceDisplay, DepositButton } from './balance';
 
 function PrizePool() {
     const [pool, setPool] = useState(149237934)
     return (<span> {pool} PIGGY</span>)
-}
-
-function Balance() {
-    const [balance, setBalance] = useState(1234)
-    return (
-        <div>
-            <Header size="large" className="header-margin-1">Your Balance:</Header>
-            <Header size="medium" className="header-margin-1">{balance} PIGGY</Header>
-            <Button.Group vertical>
-                <Button color="pink">Deposit PIGGY</Button>
-                <Button color="orange">Buy PIGGY</Button>
-            </Button.Group>
-        </div>
-    )
 }
 
 function Team() {
@@ -37,14 +24,16 @@ export function Dashboard() {
         <div>
             <Header size='huge' textAlign="center" className="header-margin-1">Dashboard</Header>
             <Header size='large' textAlign="center" className="header-margin-1">Current Price Pool: <PrizePool /></Header>
-        <br />
+            <br />
             <Grid columns={2} container={true}>
                 <Grid.Column textAlign="center">
                     <Team />
                 </Grid.Column>
 
                 <Grid.Column textAlign="center">
-                    <Balance />
+                    <Header size="large" className="header-margin-1">Your Balance:</Header>
+                    <BalanceDisplay />
+                    <DepositButton />
                 </Grid.Column>
             </Grid>
 

@@ -1,3 +1,11 @@
 .header-margin-1 {
     margin: .2rem !important;
 }
+
+.warEnabled {
+    color: green;
+}
+
+.warDisabled {
+    color: red;
+}
