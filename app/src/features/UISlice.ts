@@ -24,7 +24,7 @@ export const { setMenuVisible } = UISlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
-// in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
+// in the slice file. For example: `useSelector((state: RootState) => state.ui.menuVisible)`
 export const selectVisible = (state: RootState) => state.ui.menuVisible
 
 export default UISlice.reducer;
