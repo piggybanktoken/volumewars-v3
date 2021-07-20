@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Button, Image, Search, Grid, Container, Dropdown, Segment, Divider, Icon, Label } from 'semantic-ui-react'
 import NavMenu from "./menu";
 
+
 function Username() {
     const [name, setName] = useState('anonymous')
     return (
-        <Label image>
+        <Label image size="big">
             <UserProfilePicture />
             {name}
         </Label>
@@ -15,7 +16,7 @@ function Username() {
 function Level() {
     const [level, setLevel] = useState(0)
     return (
-        <Label>
+        <Label size="big">
             {level}
         </Label>
     )
@@ -23,10 +24,10 @@ function Level() {
 
 function UserIndicator() {
     return (
-        <Label.Group size="big">
+        <div>
             <Username/>
             <Level/>
-            </Label.Group>
+            </div>
     )
 }
 
@@ -50,10 +51,10 @@ function UserProfilePicture() {
     )
 }
 
-export function Header() {
+export function TopBar() {
     return (
-        <Segment compact={true}>
-            <Grid columns={3} container={true}>
+        <Segment>
+            <Grid columns={4} container={true}>
             <Grid.Column key={5} width="1" verticalAlign='middle'><NavMenu /> </Grid.Column>
             <Grid.Column key={2} floated='left' verticalAlign='middle'>
             <UserIndicator/>
