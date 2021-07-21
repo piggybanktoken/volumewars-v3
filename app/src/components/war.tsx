@@ -133,7 +133,6 @@ export function War() {
                     }
                 </Modal.Actions>
             </Modal>
-
         </div>
     )
 }

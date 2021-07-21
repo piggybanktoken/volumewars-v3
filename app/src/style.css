@@ -9,3 +9,7 @@
 .warDisabled {
     color: red;
 }
+
+.burgerMenu {
+    min-height: 10rem;
+}

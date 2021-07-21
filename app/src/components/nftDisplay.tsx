@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Icon, Image } from 'semantic-ui-react'
+import { Card, Image } from 'semantic-ui-react'
 import { NFTType, NFTType2Name, NFTType2Color } from '../features/nft'
 
 export function NFTDisplay(props: {
@@ -16,7 +16,7 @@ export function NFTDisplay(props: {
                     <span className='date'>A {NFTType2Name(props.rarity)} NFT.</span>
                 </Card.Meta>
                 <Card.Description>
-            maybe there will be a blurb here about it
+                    maybe there will be a blurb here about it
       </Card.Description>
             </Card.Content>
         </Card>

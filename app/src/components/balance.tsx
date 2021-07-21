@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Header, Button } from 'semantic-ui-react';
 
+/*
+ * TODO:
+ * - Hook up to smart contract
+ */
+
 function BalanceDisplay() {
     // TODO stub
     const [balance, setBalance] = useState(1234)
@@ -13,10 +18,10 @@ function BalanceDisplay() {
 
 function DepositButton() {
     return (
-             <Button.Group vertical>
-                <Button color="pink">Deposit PIGGY</Button>
-                <Button color="orange">Buy PIGGY</Button>
-            </Button.Group>
+        <Button.Group vertical>
+            <Button color="pink">Deposit PIGGY</Button>
+            <Button color="orange">Buy PIGGY</Button>
+        </Button.Group>
     )
 }
 

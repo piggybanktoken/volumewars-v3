@@ -28,7 +28,7 @@ function App() {
     <div>
       <Router>
         <TopBar />
-        <Sidebar.Pushable>
+        <Sidebar.Pushable className="burgerMenu">
           <Sidebar
             as={Menu}
             animation='overlay'
@@ -63,14 +63,9 @@ function App() {
                 NFT Collection
             </Menu.Item>
             </Link>
-
-
-
-
           </Sidebar>
 
           <Sidebar.Pusher>
-
             <Switch>
               <Route path="/drizzle">
                 <DrizzleContent />
@@ -84,44 +79,7 @@ function App() {
               <Route path="/nfts">
                 <NFTCollection />
               </Route>
-
-
-
             </Switch>
-
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-              TODO make page padding unnecessary
-
           </Sidebar.Pusher>
         </Sidebar.Pushable>
       </Router>

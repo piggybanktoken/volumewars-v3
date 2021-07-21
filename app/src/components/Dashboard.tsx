@@ -1,6 +1,11 @@
-import React, { useState } from "react";
-import { Grid, Button, Label, Header, Container } from 'semantic-ui-react'
-import { BalanceDisplay, DepositButton } from './balance';
+import React, { useState } from "react"
+import { Grid, Header } from 'semantic-ui-react'
+import { BalanceDisplay, DepositButton } from './balance'
+import TeamDisplay from './teamDisplay'
+/*
+ * TODO:
+ * - Hook up to smart contract
+ */
 
 function PrizePool() {
     const [pool, setPool] = useState(149237934)
@@ -8,14 +13,11 @@ function PrizePool() {
 }
 
 function Team() {
-    const [teamID, setTeam] = useState("asdfawefafsfa")
+    const [teamID, setTeam] = useState(2)
     const [teamDamage, setDamage] = useState(915139)
     return (
-        <div>
-            <Header size="large" className="header-margin-1">Your Team:</Header>
-            <Header size="medium" className="header-margin-1">Team ID: {teamID}</Header>
-            <Header size="medium" className="header-margin-1">Team Damage: {teamDamage}</Header>
-        </div>
+        <TeamDisplay team={teamID}
+                     damagePoints={teamDamage}/>
     )
 }
 
@@ -27,6 +29,7 @@ export function Dashboard() {
             <br />
             <Grid columns={2} container={true}>
                 <Grid.Column textAlign="center">
+                    <Header size="large" className="header-margin-1">Your Team:</Header>
                     <Team />
                 </Grid.Column>
 
