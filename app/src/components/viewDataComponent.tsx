@@ -3,7 +3,7 @@ import { newContextComponents } from "@drizzle/react-components";
 import { Drizzle } from "@drizzle/store";
 import { buyTokensAPI, PANCAKE_ROUTER_V2 } from "../app/swap";
 import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
-import  { deposit } from '../app/piggyGame'
+import  { deposit, withdraw, buyTokens, attack, gameBalanceOf } from '../app/piggyGame'
 import { gameAddress } from "../app/piggyGame";
 import { Button, Checkbox, Form } from 'semantic-ui-react'
 
@@ -44,9 +44,13 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
         <br></br>
         <h3>Current Balance: {piggyBalance} $PIGGY </h3>
         <Button onClick={initialSettings}>Game Setup</Button>
-        <Button onClick={() => {transfer(gameAddress, "514394565612698262").then(() => getPiggyBalance())}}>Send Piggy</Button>
-        <Button onClick={() => {deposit("514394565612698262").then(() => getPiggyBalance())}} >Deposit</Button>
+        <Button onClick={() => {transfer(gameAddress, "50000000000000000").then(() => getPiggyBalance())}}>Send Piggy</Button>
+        <Button onClick={() => {deposit("50000000000000000").then(() => getPiggyBalance())}} >Deposit</Button>
         <Button onClick={() => {balanceOf(gameAddress).then((res) => console.log(res))}} >Get Game Balance</Button>
+        <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => console.log(res))}} >Get User Game Balance</Button>
+        <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => withdraw(res))}} >Withdraw All</Button>
+        <Button onClick={() => {attack("25000000000000000").then((res) => console.log(res))}} >Attack</Button>
+        <Button onClick={() => {buyTokens("1","25000000000000000").then((res) => console.log(res))}} >Attack</Button>
         <div className="section">
       </div>
       <div>

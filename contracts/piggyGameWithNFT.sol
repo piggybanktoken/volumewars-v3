@@ -639,7 +639,7 @@ contract piggyGame  is Ownable {
     
     
     // chances per grade based on threshold
-   uint256  public commonGradeChance = 2;
+    uint256  public commonGradeChance = 2;
     uint256 public rareGradeChance = 300;
     uint256 public legendaryGradeChance = 500;
     
@@ -701,8 +701,11 @@ contract piggyGame  is Ownable {
        
         
     }
-    //game players
+    // Players
     mapping(address => player) public players;
+
+    // User Piggy Balance
+    mapping(address => uint256) public balances;
     
    
     
@@ -719,16 +722,15 @@ contract piggyGame  is Ownable {
     //setup the piggyGame contract
     //@dev innitializes the owner and _operator
     //@_params piggyAddress is the address of the piggy token
-    constructor(IBEP20 piggyToken , boosterNFT _boosterNFTAddress){
+    constructor(IBEP20 piggyToken , boosterNFT _boosterNFTAddress, address _router) {
        _piggyToken = piggyToken ;
        _boosterNFT = _boosterNFTAddress;
        _operator = _msgSender();
-      
-    }
-    
-   
 
-   
+       testSwapRouter = IUniswapV2Router02(_router);
+       testSwapPair = IUniswapV2Factory(testSwapRouter.factory()).getPair(address(piggyToken), testSwapRouter.WETH());
+       require(testSwapPair != address(0), "TEST::updateTestSwapRouter: Invalid pair address.");
+    }
     /**
      * @dev Throws if called by any account other than the operator.
      */
@@ -757,8 +759,70 @@ contract piggyGame  is Ownable {
     function operator() public view returns (address) {
         return _operator;
     }
-   
-    function deposit(uint256 amount)  public  {
+
+    function balanceOf(address _player) public view returns (uint256) {
+        return balances[_player];
+    }
+
+    function buyTokens(uint256 minTokens) public payable {
+        require(msg.value > 0, "No BNB provided");
+        uint256 initialTokenBalance = _piggyToken.balanceOf(address(this));
+        swapEthForExactTokens(msg.value, minTokens);
+        uint256 finalTokenBalance = _piggyToken.balanceOf(address(this));
+        uint256 tokensReceived = finalTokenBalance - initialTokenBalance;
+        require(tokensReceived > 0, "No Tokens provided");
+        balances[msg.sender] = balances[msg.sender] + tokensReceived;
+    }
+    function deposit(uint256 amount) public {
+        uint256 tokenbalance =_piggyToken.balanceOf(msg.sender);
+        require(tokenbalance >= amount, "Insufficient funds");
+        require(amount >= commonThreshold, "Amount below minimun play amount");
+        uint256 previousBalance = _piggyToken.balanceOf(address(this));
+        // Transfer tokens to the game contract
+        _piggyToken.transferFrom(msg.sender, address(this), amount);
+        uint256 currentBalance = _piggyToken.balanceOf(address(this));
+        require(currentBalance - previousBalance > 0, "Negative Balance Increase");
+        balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
+    }
+
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        uint256 previousBalance = _piggyToken.balanceOf(address(this));
+        _piggyToken.transfer(msg.sender, amount);
+        balances[msg.sender] = balances[msg.sender] - amount;
+        uint256 currentBalance = _piggyToken.balanceOf(address(this));
+        require((previousBalance - currentBalance) == amount, "Contract balance decrease greater than amount");
+    }
+
+    function attack(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        uint256 initialBalance = _piggyToken.balanceOf(address(this));
+        uint256 initialETHBalance = address(this).balance;
+
+        swapTokensForEth(amount);
+        emit charged(msg.sender, amount);
+        balances[msg.sender] = balances[msg.sender] - amount;
+
+        uint256 currentBalance = _piggyToken.balanceOf(address(this));
+        uint256 currentETHBalance = address(this).balance;
+        require((initialBalance - currentBalance) <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
+        uint256 ETHReceived = currentETHBalance - initialETHBalance;
+        require(ETHReceived > 0, "Negative BNB from selling tokens");
+
+        swapEthForTokens(ETHReceived);
+        emit attacked(msg.sender, ETHReceived);
+
+        uint256 finalETHBalance = address(this).balance;
+        uint256 finalBalance = _piggyToken.balanceOf(address(this));
+        require(finalETHBalance >= initialETHBalance, "BNB Balance of contract decreased");
+        uint256 tokensReceived = finalBalance - currentBalance;
+        require(tokensReceived > 0, "Tokens lost in purchase");
+        require(tokensReceived < amount, "Tokens increased after charge and attack");
+        balances[msg.sender] = balances[msg.sender] + tokensReceived;
+        players[msg.sender].gamesPlayed += 1;
+    }
+    
+    function deposit_(uint256 amount)  public  {
         uint256 tokenbalance =_piggyToken.balanceOf(msg.sender);
          require( tokenbalance >= amount , "insuficient funds");
          require(amount >= commonThreshold ,"Amount below minimun play amount");
@@ -824,7 +888,7 @@ contract piggyGame  is Ownable {
          actualGuess  = 0;   
          degreeOfRandomness = 0;
          playchance = 0;
-       players[_msgSender()].gamesPlayed += 1;
+        players[_msgSender()].gamesPlayed += 1;
         
          
     }
@@ -955,20 +1019,35 @@ contract piggyGame  is Ownable {
     }
 
     /// @dev Swap tokens for eth
-    function swapTokensForEth(uint256 tokenAmount ) private {
+    function swapTokensForEth(uint256 tokenAmount) private {
         // generate the testSwap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = piggyAddress;
         path[1] = testSwapRouter.WETH();
 
-        _piggyToken.approve(address(testSwapRouter), tokenAmount);
+        _piggyToken.approve(address(testSwapRouter), tokenAmount*2);
         
         // make the swap
         testSwapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(
-           tokenAmount ,
+           tokenAmount,
             0, // get anything we can
             path,
-             address(this),
+            address(this),
+            block.timestamp
+        );
+    }
+    // @dev Swap tokens for eth
+    function swapEthForExactTokens(uint256 EthAmount, uint256 minTokens) private {
+        // generate the testSwap pair path of token -> weth
+        address[] memory path = new address[](2);
+        path[0] = testSwapRouter.WETH();
+        path[1] = piggyAddress;
+
+        // make the swap
+        testSwapRouter.swapETHForExactTokens{value: EthAmount}(
+            minTokens,// get anything we can
+            path,
+            address(this),
             block.timestamp
         );
     }
