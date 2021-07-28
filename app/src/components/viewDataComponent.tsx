@@ -84,6 +84,13 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
           labels={["Amount to Deposit"]}
         />
       <h3>Unpack booster packs</h3>
+      <ContractData
+          drizzle={drizzle}
+          drizzleState={drizzleState}
+          contract="piggyGame"
+          method="bootsterPackBalanceOf"
+          methodArgs={[drizzleState["accounts"][0]]}
+        />
       <ContractForm
           drizzle={drizzle}
           contract="piggyGame"

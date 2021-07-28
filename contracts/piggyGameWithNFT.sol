@@ -694,12 +694,13 @@ contract piggyGame  is Ownable {
         uint256 rare;
         uint256 common;
     }
-    
-     struct player {
+
+    struct player {
         uint256 gamesPlayed;
         uint256 bootsterPacks;
-       
-        
+        uint256 season;
+        uint256 team;
+        uint256 experience;
     }
     // Players
     mapping(address => player) public players;
@@ -707,22 +708,33 @@ contract piggyGame  is Ownable {
     // User Piggy Balance
     mapping(address => uint256) public balances;
     
-   
-    
-    
-     chances public defaultChances;
-     
-     
-     //internals
-     uint256 private requiredGuess ;
-     uint256 private actualGuess  ;
-     uint256 private degreeOfRandomness ; 
-     uint256 private playchance;
-     
+    uint256 public season;
+
+    struct Team {
+        bool enabled;
+        uint256 wins;
+        uint256 damagePoints;
+    }
+
+    // Teams
+    mapping(uint256 => Team) public teams;
+
+    uint256 latestTeam = 0;
+
+    uint256 public joinFee = 100000000000000000; // 0.1 ETH
+    bool public open = false;
+
+    chances public defaultChances; 
+    //internals
+    uint256 private requiredGuess;
+    uint256 private actualGuess;
+    uint256 private degreeOfRandomness ; 
+    uint256 private playchance;
+
     //setup the piggyGame contract
     //@dev innitializes the owner and _operator
     //@_params piggyAddress is the address of the piggy token
-    constructor(IBEP20 piggyToken , boosterNFT _boosterNFTAddress, address _router) {
+    constructor(IBEP20 piggyToken, boosterNFT _boosterNFTAddress, address _router) {
        _piggyToken = piggyToken ;
        _boosterNFT = _boosterNFTAddress;
        _operator = _msgSender();
@@ -740,18 +752,18 @@ contract piggyGame  is Ownable {
     }
     
     //events 
-     event  TestSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
-     event  OperatorTransferred(address indexed previousOperator, address indexed newOperator);
-     event  gamePoolFundAddressUpdated(address indexed operator , address indexed gameFundAddress);
-     event  amountThresholdUpdated(address indexed operator , uint256  commonThreshold ,  uint256  rareThreshold ,  uint256  legendaryThreshold);
-     event  defaultGameChanceUpdated(address indexed operator , uint256  commonChance ,  uint256  rareChance ,  uint256  legendaryChance);
-     event  rerollThresholdUpdated(address indexed operator , uint256  previous_commonRerollThreshold ,  uint256 new_commonRerollThreshold , uint256  previous_rareRerollThreshold ,  uint256 new_rareRerollThreshold );
-     event  rerollChancesUpdated(address indexed operator , uint256  previous_commonRerollChance ,  uint256 new_commonRerollChance , uint256  previous_rareRerollChance ,  uint256 new_rareRerollChance );
-     event  gameEaseLevelUpdated(address indexed operator , uint256 _easelevel);
-     event  charged(address indexed player, uint256 amount);
-     event  attacked(address indexed player, uint256 amount);
-     event  rewardEarned(address indexed player , uint256 rewardID);
-     event  gamePlayed(address indexed player , bool earnedReward , uint256 easelevel , uint256 requiredGuess , uint256 actualGuess  , uint256 degreeOfRandomness , uint256 playchance );
+    event  TestSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
+    event  OperatorTransferred(address indexed previousOperator, address indexed newOperator);
+    event  gamePoolFundAddressUpdated(address indexed operator , address indexed gameFundAddress);
+    event  amountThresholdUpdated(address indexed operator , uint256  commonThreshold ,  uint256  rareThreshold ,  uint256  legendaryThreshold);
+    event  defaultGameChanceUpdated(address indexed operator , uint256  commonChance ,  uint256  rareChance ,  uint256  legendaryChance);
+    event  rerollThresholdUpdated(address indexed operator , uint256  previous_commonRerollThreshold ,  uint256 new_commonRerollThreshold , uint256  previous_rareRerollThreshold ,  uint256 new_rareRerollThreshold );
+    event  rerollChancesUpdated(address indexed operator , uint256  previous_commonRerollChance ,  uint256 new_commonRerollChance , uint256  previous_rareRerollChance ,  uint256 new_rareRerollChance );
+    event  gameEaseLevelUpdated(address indexed operator , uint256 _easelevel);
+    event  charged(address indexed player, uint256 amount);
+    event  attacked(address indexed player, uint256 amount);
+    event  rewardEarned(address indexed player , uint256 rewardID);
+    event  gamePlayed(address indexed player , bool earnedReward , uint256 easelevel , uint256 requiredGuess , uint256 actualGuess  , uint256 degreeOfRandomness , uint256 playchance );
       
      /**
      * @dev Returns the address of the current operator.
@@ -759,12 +771,33 @@ contract piggyGame  is Ownable {
     function operator() public view returns (address) {
         return _operator;
     }
-
     function balanceOf(address _player) public view returns (uint256) {
         return balances[_player];
     }
-
+    function setOpen(bool isOpen) public onlyOperator {
+        open = isOpen;
+    }
+    function setSeason(uint256 _season) public onlyOperator {
+        season = _season;
+    }
+    function addTeam() public onlyOperator {
+        latestTeam += 1;
+        teams[latestTeam].enabled = true;
+    }
+    function setJoinFee(uint256 fee) public onlyOperator {
+        joinFee = fee;
+    }
+    function join() public payable {
+        require(open, "Game is closed");
+        require(msg.value == joinFee, "BNB provided must equal the fee");
+        require(players[msg.sender].season != season, "Player has already joined season");
+        players[msg.sender].season = season;
+        if (players[msg.sender].team == 0) {
+            players[msg.sender].team = 1; // TODO: Random team
+        }
+    }
     function buyTokens(uint256 minTokens) public payable {
+        require(open, "Game is closed");
         require(msg.value > 0, "No BNB provided");
         uint256 initialTokenBalance = _piggyToken.balanceOf(address(this));
         swapEthForExactTokens(msg.value, minTokens);
@@ -774,6 +807,7 @@ contract piggyGame  is Ownable {
         balances[msg.sender] = balances[msg.sender] + tokensReceived;
     }
     function deposit(uint256 amount) public {
+        require(open, "Game is closed");
         uint256 tokenbalance =_piggyToken.balanceOf(msg.sender);
         require(tokenbalance >= amount, "Insufficient funds");
         require(amount >= commonThreshold, "Amount below minimun play amount");
@@ -794,7 +828,13 @@ contract piggyGame  is Ownable {
         require((previousBalance - currentBalance) == amount, "Contract balance decrease greater than amount");
     }
 
-    function attack(uint256 amount) public {
+    function attack(uint256 amount, uint256 team) public {
+        require(open, "Game is closed");
+        require(season > 0, "Season not set");
+        require(players[msg.sender].season == season, "Player has not entered season");
+        require(players[msg.sender].team != team, "Cannot attack own team");
+        require(players[msg.sender].team == 0, "Player is not on any team");
+        require(teams[team].enabled, "Team is not enabled");
         require(balances[msg.sender] >= amount, "Insufficient balance");
         uint256 initialBalance = _piggyToken.balanceOf(address(this));
         uint256 initialETHBalance = address(this).balance;
@@ -819,7 +859,19 @@ contract piggyGame  is Ownable {
         require(tokensReceived > 0, "Tokens lost in purchase");
         require(tokensReceived < amount, "Tokens increased after charge and attack");
         balances[msg.sender] = balances[msg.sender] + tokensReceived;
+        if (canGetReward(amount)) {
+            players[msg.sender].bootsterPacks += 1;
+            emit gamePlayed(msg.sender, true,  easelevel, requiredGuess,  actualGuess,  degreeOfRandomness,  playchance);
+        } else {
+            emit gamePlayed(msg.sender, false, easelevel, requiredGuess, actualGuess, degreeOfRandomness, playchance);
+        }
+        requiredGuess = 0 ;
+        actualGuess  = 0;   
+        degreeOfRandomness = 0;
+        playchance = 0;
         players[msg.sender].gamesPlayed += 1;
+        players[msg.sender].experience += amount;
+        teams[players[msg.sender].team].damagePoints += amount;
     }
     
     function deposit_(uint256 amount)  public  {
