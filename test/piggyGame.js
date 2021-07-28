@@ -6,7 +6,7 @@ contract("PiggyGame", accounts => {
     const balance = await game.balanceOf.call(accounts[0])
     assert.equal(balance, 0, "Balance not zero")
     await game.setOpen(true)
-    await game.updateTestSwapRouter("0x10ed43c718714eb63d5aa57b78b54704e256024e", '0xcd2ecd5e06b1a330789b30e8ada3d11c51503a71')
+    await game.updatePancakeSwapRouter("0x10ed43c718714eb63d5aa57b78b54704e256024e", '0xcd2ecd5e06b1a330789b30e8ada3d11c51503a71')
     await game.addTeam()
     await game.addTeam()
     await game.setSeason(1)
