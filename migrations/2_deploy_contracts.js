@@ -1,6 +1,7 @@
 const piggyGame = artifacts.require("piggyGame")
 const profileNFT = artifacts.require("WBProfileNFT")
-const boosterNFT = artifacts.require("boosterNFT")
+// const boosterNFT = artifacts.require("boosterNFT")
+const boosterNFT = artifacts.require("piggyNFT")
 
 module.exports = function(deployer) {
     return deployer.deploy(profileNFT).then(() => {

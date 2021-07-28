@@ -1046,7 +1046,7 @@ contract boosterNFT is ERC1155Burnable , Ownable{
     }
     /**
      * @dev add  booster contract which has the minter role  of the contract 
-     * Can only be called by the owner.
+     * Can only be called by the owner
      */
     function assignBoosterContract(address newMinter) public  onlyOwner {
         require(newMinter != address(0), " new minter  is the zero address");

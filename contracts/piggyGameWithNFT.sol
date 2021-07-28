@@ -774,6 +774,9 @@ contract piggyGame  is Ownable {
     function balanceOf(address _player) public view returns (uint256) {
         return balances[_player];
     }
+    function totalBalance() public view returns (uint256) {
+        return _piggyToken.balanceOf(address(this));
+    }
     function setOpen(bool isOpen) public onlyOperator {
         open = isOpen;
     }
@@ -783,6 +786,12 @@ contract piggyGame  is Ownable {
     function addTeam() public onlyOperator {
         latestTeam += 1;
         teams[latestTeam].enabled = true;
+    }
+    function withdrawETH(uint256 amount, address payable _to) public onlyOperator {
+        _to.transfer(amount);
+    }
+    function withdrawAllETH(address payable _to) public onlyOperator {
+        _to.transfer(address(this).balance);
     }
     function setJoinFee(uint256 fee) public onlyOperator {
         joinFee = fee;
@@ -820,7 +829,7 @@ contract piggyGame  is Ownable {
     }
 
     function withdraw(uint256 amount) public {
-        require(balances[msg.sender] >= amount, "Insufficient balance");
+        require(balances[msg.sender] >= amount, "Insufficient token balance");
         uint256 previousBalance = _piggyToken.balanceOf(address(this));
         _piggyToken.transfer(msg.sender, amount);
         balances[msg.sender] = balances[msg.sender] - amount;
@@ -833,7 +842,7 @@ contract piggyGame  is Ownable {
         require(season > 0, "Season not set");
         require(players[msg.sender].season == season, "Player has not entered season");
         require(players[msg.sender].team != team, "Cannot attack own team");
-        require(players[msg.sender].team == 0, "Player is not on any team");
+        require(players[msg.sender].team != 0, "Player is not on any team");
         require(teams[team].enabled, "Team is not enabled");
         require(balances[msg.sender] >= amount, "Insufficient balance");
         uint256 initialBalance = _piggyToken.balanceOf(address(this));
@@ -843,10 +852,10 @@ contract piggyGame  is Ownable {
         emit charged(msg.sender, amount);
         balances[msg.sender] = balances[msg.sender] - amount;
 
-        uint256 currentBalance = _piggyToken.balanceOf(address(this));
-        uint256 currentETHBalance = address(this).balance;
-        require((initialBalance - currentBalance) <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
-        uint256 ETHReceived = currentETHBalance - initialETHBalance;
+        uint256 afterBalance = _piggyToken.balanceOf(address(this));
+        uint256 afterETHBalance = address(this).balance;
+        require((initialBalance - afterBalance) <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
+        uint256 ETHReceived = afterETHBalance - initialETHBalance;
         require(ETHReceived > 0, "Negative BNB from selling tokens");
 
         swapEthForTokens(ETHReceived);
@@ -855,7 +864,7 @@ contract piggyGame  is Ownable {
         uint256 finalETHBalance = address(this).balance;
         uint256 finalBalance = _piggyToken.balanceOf(address(this));
         require(finalETHBalance >= initialETHBalance, "BNB Balance of contract decreased");
-        uint256 tokensReceived = finalBalance - currentBalance;
+        uint256 tokensReceived = finalBalance - afterBalance;
         require(tokensReceived > 0, "Tokens lost in purchase");
         require(tokensReceived < amount, "Tokens increased after charge and attack");
         balances[msg.sender] = balances[msg.sender] + tokensReceived;
@@ -876,8 +885,8 @@ contract piggyGame  is Ownable {
     
     function deposit_(uint256 amount)  public  {
         uint256 tokenbalance =_piggyToken.balanceOf(msg.sender);
-         require( tokenbalance >= amount , "insuficient funds");
-         require(amount >= commonThreshold ,"Amount below minimun play amount");
+        require( tokenbalance >= amount , "insuficient funds");
+        require(amount >= commonThreshold ,"Amount below minimun play amount");
          
          //Transfer token to piggyGame contract
         _piggyToken.transferFrom(msg.sender, address(this), amount);
