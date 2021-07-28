@@ -24,7 +24,7 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
   }
   async function initialSettings() {
     const game = (drizzle as any).contracts.piggyGame
-    const stackId = game.methods.updateTestSwapRouter.cacheSend(PANCAKE_ROUTER_V2, tokenAddress, {"from": drizzleState["accounts"][0], "gas": 999999})
+    const stackId = game.methods.updatePancakeSwapRouter.cacheSend(PANCAKE_ROUTER_V2, tokenAddress, {"from": drizzleState["accounts"][0], "gas": 999999})
     const stackId2 = game.methods.setGamePoolFundAddress.cacheSend(drizzleState["accounts"][2], {"from": drizzleState["accounts"][0], "gas": 999999})
   }
   useEffect(() =>{
