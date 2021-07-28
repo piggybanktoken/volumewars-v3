@@ -125,13 +125,6 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
           method="transferOperator"
           labels={["New Operator Address"]}
         />
-       <h3>Set Game Pool Fund Address</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="setGamePoolFundAddress"
-          labels={["New Fund Address"]}
-        />
       <h3>Set Ease Level</h3>
       <ContractForm
           drizzle={drizzle}
