@@ -14,7 +14,14 @@ contract("PiggyGame", accounts => {
     await game.addTeam()
     await game.setSeason(1)
     await game.join({ from: accounts[0] , value: "100000000000000000"})
+    await game.mintNFT(accounts[0], 5, 6);
     await game.transferOwnership(accounts[1])
+    const nfts = await nft.tokenOfOwnerByIndex.call(accounts[0], 0)
+    const nftbalance = await nft.balanceOf.call(accounts[0])
+    const owner = await nft.ownerOf.call(nfts)
+    const {0: series, 1: number} = await nft.metadataOf.call(nfts)
+    console.log(nfts.toString(), nftbalance.toString(), owner.toString(), series.toString(), number.toString())
+
     await game.buyTokens("50000000000000000", { from: accounts[0] , value: "50000000000000000"})
     const balanceAfter = await game.balanceOf.call(accounts[0])
     assert.equal(balanceAfter.toString(), "42500000212500001", "Balance not correct")

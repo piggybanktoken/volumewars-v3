@@ -12,7 +12,8 @@ import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAut
 import "./IBEP20.sol";
 
 interface IRewardNFT is IERC721 {
-    function mint(address to) external;
+    function mint(address to, uint16 set, uint8 number) external;
+    function metadataOf(uint256 id) external returns (uint16, uint8);
 }
 
 contract piggyGame is Ownable {
@@ -53,7 +54,7 @@ contract piggyGame is Ownable {
 
     struct Player {
         uint256 gamesPlayed;
-        uint256 season;
+        uint16 season;
         uint256 team;
         uint256 experience;
         BoosterPack[] boosterPacks;
@@ -84,8 +85,19 @@ contract piggyGame is Ownable {
     Thresholds public thresholds = Thresholds({
         grade1: 10   * 10**9 * 10**9,
         grade2: 50   * 10**9 * 10**9,
-        grade3: 100  * 10**9 * 10**9,
+        grade3: 150  * 10**9 * 10**9,
         grade4: 500  * 10**9 * 10**9
+    });
+
+    struct RareChance {
+        uint8 grade2;
+        uint8 grade3;
+        uint8 grade4;
+    }
+    RareChance public rareChance = RareChance({
+        grade2: 30, // 1 in 30 Chance
+        grade3: 10, // 1 in 10 Chance
+        grade4: 5   // 1 in 5 Chance
     });
 
     uint256 latestRID = 0;
@@ -94,7 +106,7 @@ contract piggyGame is Ownable {
     
     bool public open = false;
 
-    uint256 public season = 0;
+    uint16 public season = 0;
 
     uint256 public joinFee = 100000000000000000; // 0.1 ETH
 
@@ -134,7 +146,7 @@ contract piggyGame is Ownable {
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
     }
-    function setSeason(uint256 _season) public onlyOwner {
+    function setSeason(uint16 _season) public onlyOwner {
         season = _season;
     }
     function openSeason() public onlyOwner {
@@ -311,44 +323,57 @@ contract piggyGame is Ownable {
         uint8 numCommon = 0;
         uint8 numRare = 0;
         uint8 nonce = 1;
-        if (grade == 1) { // Grade 1: No rares, 0 to 1 Common NFTs
+        if (grade == 1) { // Grade 1: 1 in 3 chance of Common NFT, No Rare
+            // Common, 1 in 3 chance
+            if (getRandomInt(2, seed, nonce) == 0) {
+                numCommon = 1;
+            }
+        } else if (grade == 2) { // Grade 2: 0 to 1 Common NFTs, 1 in rareChance.grade2 Chance of Rare
+            // Common
             numCommon = getRandomInt(1, seed, nonce);
-        } else if (grade == 2) { // Grade 2: 0 to 1 Common NFTs, 1 in 10 Chance of Rare
-            numCommon = getRandomInt(1, seed, nonce);
-
-            if (getRandomInt(10, seed, nonce+1) == 10) {
+            nonce +=1;
+            // Rare
+            if (getRandomInt(rareChance.grade2-1, seed, nonce) == 0) {
                 numRare = 1;
             }
-        } else if (grade == 3) { // Grade 2: 0 to 2 Common NFTs, 1 in 8 Chance of Rare
+        } else if (grade == 3) { // Grade 2: 0 to 2 Common NFTs, 1 in rareChance.grade3 Chance of Rare
+            // Common
             numCommon = getRandomInt(2, seed, nonce);
-
-            if (getRandomInt(7, seed, nonce+1) == 7) {
+            nonce +=1;
+            // Rare
+            if (getRandomInt(rareChance.grade3-1, seed, nonce) == 0) {
                 numRare = 1;
             }
-        } else if (grade == 4) { // Grade 2: 1 to 3 Common NFTs, 1 in 5 Chance of Rare
+        } else if (grade == 4) { // Grade 2: 1 to 3 Common NFTs, 1 in rareChance.grade4 Chance of Rare
+            // Common
             numCommon = getRandomInt(2, seed, nonce) + 1;
-
-            if (getRandomInt(4, seed, nonce+1) == 4) {
+            nonce +=1;
+            // Rare
+            if (getRandomInt(rareChance.grade4-1, seed, nonce) == 0) {
                 numRare = 1;
             }
+        }
+        if (numCommon == 0 && numRare == 0) {
+            return;
         }
         assignNFTs(numCommon, numRare, seed);
     }
 
     function assignNFTs(uint8 numCommon, uint8 numRare, uint256 seed) private {
-        if (numCommon == 0 && numRare == 0) {
-            return;
-        }
         uint8 nonce = 10;
         require(numCommon <= 3, "Too many common NFTs generated");
         require(numRare <= 1, "Too many rare NFTs generated");
-        for (uint256 i = 0 ; i < numCommon ; i++) {
-            getRandomInt(7, seed, nonce+1);
+        for (uint8 i = 0 ; i < numCommon ; i++) {
+            nonce += 1;
             // Mint Common NFT
+            uint8 number = getRandomInt(3, seed, nonce) + 1; // 0-3 + 1 = 1-4
+            rewardNFT.mint(msg.sender, season, number);
         }
         if (numRare == 1) {
+            nonce +=1;
             // Mint Rare NFT
-            rewardNFT.mint(msg.sender);
+            uint8 number = getRandomInt(2, seed, nonce) + 5; // 0-2 + 5 = 5-7
+            rewardNFT.mint(msg.sender, season, number);
         }
     }
 
@@ -359,6 +384,14 @@ contract piggyGame is Ownable {
     function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
         thresholds = Thresholds({
             grade1: grade1, 
+            grade2: grade2,
+            grade3: grade3,
+            grade4: grade4
+        });
+    }
+
+    function setRareChance(uint8 grade2, uint8 grade3, uint8 grade4) public onlyOwner {
+        rareChance = RareChance({
             grade2: grade2,
             grade3: grade3,
             grade4: grade4
@@ -420,5 +453,8 @@ contract piggyGame is Ownable {
             return true;
         }
         return false;
+    }
+    function mintNFT(address to, uint16 set, uint8 number) public onlyOwner {
+        rewardNFT.mint(to, set, number);
     }
 }
