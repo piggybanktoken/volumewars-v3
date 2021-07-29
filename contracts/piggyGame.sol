@@ -151,6 +151,10 @@ contract piggyGame is Ownable {
     function setSeason(uint256 _season) public onlyOwner {
         season = _season;
     }
+    function openSeason() public onlyOwner {
+        season += 1;
+        open = true;
+    }
     function addTeam() public onlyOwner {
         latestTeam += 1;
         teams[latestTeam].enabled = true;
