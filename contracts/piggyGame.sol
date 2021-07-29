@@ -23,11 +23,6 @@ contract piggyGame is Ownable {
 
     // Reward NFT address
     IRewardNFT public rewardNFT;
-
-    // Token grade * 10**9 because that the default piggy decimal
-    // uint256 public commonThreshold = 1 *  10**6  * 10**9;
-    // uint256 public rareThreshold = 10 * 10**6 *10**9;
-    // uint256 public legendaryThreshold = 100 * 10**6  *10**9; 
     
     // The swap router, modifiable.
     IUniswapV2Router02 public pancakeSwapRouter;
