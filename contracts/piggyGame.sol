@@ -158,10 +158,10 @@ contract piggyGame is Ownable {
     function balanceOf(address _player) public view returns (uint256) {
         return balances[_player];
     }
-    function bootsterPackBalanceOf(address _player) public view returns(uint256){
+    function boosterPackBalanceOf(address _player) public view returns(uint256){
         return players[_player].boosterPacks.length;
     }
-    function totalgamePlayedOf(address _player) public view returns(uint256){
+    function totalGamesPlayedOf(address _player) public view returns(uint256){
         return players[_player].gamesPlayed;
     }
     function teamOf(address _player) public view returns(uint256){
