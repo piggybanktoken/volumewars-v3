@@ -3,9 +3,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 
-contract piggyNFT is ERC721 {
-    constructor() ERC721("VolumeWars NFT", "VW") {
+contract piggyNFT is ERC721PresetMinterPauserAutoId {
+
+    constructor(address game) ERC721PresetMinterPauserAutoId("VolumeWars NFT", "VW", "token") {
+        grantRole(MINTER_ROLE, game);
     }
 }
 

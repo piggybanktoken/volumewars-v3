@@ -39,8 +39,6 @@ contract piggyGame is Ownable {
 
     // Reward NFT address
     IRewardNFT public rewardNFT;
-    
-    address public _operator;
 
     // Token grade * 10**9 because that the default piggy decimal
     // uint256 public commonThreshold = 1 *  10**6  * 10**9;
@@ -114,22 +112,12 @@ contract piggyGame is Ownable {
 
     uint256 public joinFee = 100000000000000000; // 0.1 ETH
 
-    constructor(IBEP20 _piggyToken, IRewardNFT _rewardNFTAddress, address _router) {
+    constructor(IBEP20 _piggyToken, address _router) {
        piggyToken = _piggyToken;
-       rewardNFT = _rewardNFTAddress;
-       _operator = _msgSender();
        piggyAddress = address(piggyToken);
        pancakeSwapRouter = IUniswapV2Router02(_router);
        pancakeSwapPair = IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(address(piggyToken), pancakeSwapRouter.WETH());
        require(pancakeSwapPair != address(0), "TEST::updatepancakeSwapRouter: Invalid pair address.");
-    }
-
-    /**
-     * @dev Throws if called by any account other than the operator.
-     */
-    modifier onlyOperator() {
-        require( _operator == _msgSender() || owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
     }
 
     event pancakeSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
@@ -142,9 +130,6 @@ contract piggyGame is Ownable {
     /**
     * @dev Returns the address of the current operator.
     */
-    function operator() public view returns (address) {
-        return _operator;
-    }
     function totalBalance() public view returns (uint256) {
         return piggyToken.balanceOf(address(this));
     }
@@ -160,30 +145,30 @@ contract piggyGame is Ownable {
     function teamOf(address _player) public view returns(uint256){
         return players[_player].team;
     }
-    function setOpen(bool isOpen) public onlyOperator {
+    function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
     }
-    function setSeason(uint256 _season) public onlyOperator {
+    function setSeason(uint256 _season) public onlyOwner {
         season = _season;
     }
-    function addTeam() public onlyOperator {
+    function addTeam() public onlyOwner {
         latestTeam += 1;
         teams[latestTeam].enabled = true;
     }
-    function withdrawETH(uint256 amount, address payable _to) public onlyOperator {
+    function withdrawETH(uint256 amount, address payable _to) public onlyOwner {
         _to.transfer(amount);
     }
-    function withdrawAllETH(address payable _to) public onlyOperator {
+    function withdrawAllETH(address payable _to) public onlyOwner {
         _to.transfer(address(this).balance);
     }
-    function setJoinFee(uint256 fee) public onlyOperator {
+    function setJoinFee(uint256 fee) public onlyOwner {
         joinFee = fee;
     }
     /**
      * @dev Update the swap router.
      * Can only be called by the current operator.
      */
-    function updatePancakeSwapRouter(address _router, address _piggyAddress) public onlyOperator {
+    function updatePancakeSwapRouter(address _router, address _piggyAddress) public onlyOwner {
         piggyAddress = _piggyAddress;
         piggyToken = IBEP20(_piggyAddress);
         pancakeSwapRouter = IUniswapV2Router02(_router);
@@ -191,18 +176,10 @@ contract piggyGame is Ownable {
         require(pancakeSwapPair != address(0), "TEST::updatepancakeSwapRouter: Invalid pair address.");
         emit pancakeSwapRouterUpdated(msg.sender, address(pancakeSwapRouter), pancakeSwapPair);
     }
-    function updateNFTAddress(IRewardNFT _rewardNFTAddress) public onlyOperator {
+    function updateNFTAddress(IRewardNFT _rewardNFTAddress) public onlyOwner {
         rewardNFT = _rewardNFTAddress;
     }
-    /**
-    * @dev Transfers ownership of the contract to a new account (`newOwner`).
-    * Can only be called by the current owner.
-    */
-    function transferOperator(address newOperator) public  onlyOperator {
-        require(newOperator != address(0), " new operator is the zero address");
-        emit OperatorTransferred(_operator, newOperator);
-        _operator = newOperator;
-    }
+
     function join() public payable {
         require(open, "Game is closed");
         require(msg.value == joinFee, "BNB provided must equal the fee");
@@ -386,7 +363,7 @@ contract piggyGame is Ownable {
         return uint8(uint256(keccak256(abi.encodePacked(seed, nonce))) % (max+1));
     }
     
-    function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOperator {
+    function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
         thresholds = Thresholds({
             grade1: grade1, 
             grade2: grade2,
