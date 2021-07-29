@@ -124,8 +124,27 @@ contract piggyGame is Ownable {
     }
 
     event pancakeSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
-    event OperatorTransferred(address indexed previousOperator, address indexed newOperator);
-    event attacked(address indexed player, uint256 amount);
+    event SetOpen(address indexed owner, bool indexed open);
+    event SetSeason(address indexed owner, uint32 indexed season);
+    event SetJoinFee(address indexed owner, uint256 fee);
+    event SeasonClose(address indexed owner, uint32 indexed season, uint32 indexed winner);
+    event SeasonOpen(address indexed owner, uint32 indexed season);
+    event TeamAdded(address indexed owner, uint32 indexed team);
+    event OwnerWithdrawal(address indexed owner, address indexed to, uint256 amount);
+    event JoinedGame(address indexed player, uint256 indexed season);
+    event TokensPurchased(address indexed player, uint256 amount, uint256 minAmount, uint256 BNBSent);
+    event Deposit(address indexed player, uint256 amount);
+    event Withdrawal(address indexed player, uint256 amount);
+    event Attack(address indexed player, uint32 indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 TotalBalanceChange, uint256 PlayerBalanceChange);
+    event RandomNumberRequest(address indexed requester, bytes32 id);
+    event RandomNumberFulfilled(address indexed requester, uint8 indexed rtype, bytes32 id, uint256 randomness);
+    event ReceivedBoosterBack(address indexed requester, uint8 indexed grade, uint256 randomness);
+    event TeamAssigned(address indexed requester, uint32 indexed team, uint256 randomness);
+    event BoosterPackOpened(address indexed player, uint8 indexed grade, uint256 seed);
+    event NFTAwarded(address indexed player, uint16 indexed set, uint8 indexed number, bool rare);
+    event LegendaryForged(address indexed player, uint16 indexed set);
+    event ThresholdsSet(address indexed owner, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4);
+    event RareChanceSet(address indexed owner, uint256 grade2, uint256 grade3, uint256 grade4);
 
     // To receive BNB from pancakeSwapRouter when swapping
     receive() external payable {}
@@ -156,13 +175,18 @@ contract piggyGame is Ownable {
     }
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
+        emit SetOpen(msg.sender, open);
     }
     function setSeason(uint16 _season) public onlyOwner {
         season = _season;
+        emit SetSeason(msg.sender, season);
     }
     function openSeason() public onlyOwner {
         season += 1;
         open = true;
+        emit SetSeason(msg.sender, season);
+        emit SeasonOpen(msg.sender, season);
+        emit SetOpen(msg.sender, open);
     }
     function closeSeason() public onlyOwner {
         open = false;
@@ -177,21 +201,27 @@ contract piggyGame is Ownable {
             teams[activeTeams[i]].damagePoints = 0;
         }
         teams[winningTeam].wins += 1;
+        emit SeasonClose(msg.sender, season, winningTeam);
+        emit SetOpen(msg.sender, open);
     }
-    
+
     function addTeam() public onlyOwner {
         latestTeam += 1;
         teams[latestTeam].enabled = true;
         activeTeams.push(latestTeam);
+        emit TeamAdded(msg.sender, latestTeam);
     }
     function withdrawETH(uint256 amount, address payable _to) public onlyOwner {
         _to.transfer(amount);
+        emit OwnerWithdrawal(msg.sender, _to, amount);
     }
     function withdrawAllETH(address payable _to) public onlyOwner {
         _to.transfer(address(this).balance);
+        emit OwnerWithdrawal(msg.sender, _to, address(this).balance);
     }
     function setJoinFee(uint256 fee) public onlyOwner {
         joinFee = fee;
+        emit SetJoinFee(msg.sender, fee);
     }
     /**
      * @dev Update the swap router.
@@ -221,6 +251,7 @@ contract piggyGame is Ownable {
             requests[requestId].fulfilled = false;
             players[msg.sender].team = 1;
         }
+        emit JoinedGame(msg.sender, season);
     }
     function buyTokens(uint256 minTokens) public payable {
         require(open, "Game is closed");
@@ -231,6 +262,7 @@ contract piggyGame is Ownable {
         uint256 tokensReceived = finalTokenBalance - initialTokenBalance;
         require(tokensReceived > 0, "No Tokens provided");
         balances[msg.sender] = balances[msg.sender] + tokensReceived;
+        emit TokensPurchased(msg.sender, tokensReceived, minTokens, msg.value);
     }
     function deposit(uint256 amount) public {
         require(open, "Game is closed");
@@ -242,6 +274,7 @@ contract piggyGame is Ownable {
         uint256 currentBalance = piggyToken.balanceOf(address(this));
         require(currentBalance - previousBalance > 0, "Negative Balance Increase");
         balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
+        emit Deposit(msg.sender, amount);
     }
 
     function withdraw(uint256 amount) public {
@@ -251,6 +284,7 @@ contract piggyGame is Ownable {
         balances[msg.sender] = balances[msg.sender] - amount;
         uint256 currentBalance = piggyToken.balanceOf(address(this));
         require((previousBalance - currentBalance) == amount, "Contract balance decrease greater than amount");
+        emit Withdrawal(msg.sender, amount);
     }
 
     function attack(uint256 amount, uint32 team) public {
@@ -261,37 +295,47 @@ contract piggyGame is Ownable {
         require(players[msg.sender].team != 0, "Player is not on any team");
         require(teams[team].enabled, "Team is not enabled");
         require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        uint256 initialPlayerBalance = balances[msg.sender];
         uint256 initialBalance = piggyToken.balanceOf(address(this));
         uint256 initialETHBalance = address(this).balance;
 
-        swapTokensForEth(amount);
-        balances[msg.sender] = balances[msg.sender] - amount;
+        swapTokensForEth(amount); // Sell tokens for ETH
+        balances[msg.sender] -= amount;
 
         uint256 afterBalance = piggyToken.balanceOf(address(this));
         uint256 afterETHBalance = address(this).balance;
-        require((initialBalance - afterBalance) <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
-        uint256 ETHReceived = afterETHBalance - initialETHBalance;
+
+        uint256 tokensSold = initialBalance - afterBalance; // Tokens sold in the first swap
+        require(tokensSold <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
+
+        uint256 ETHReceived = afterETHBalance - initialETHBalance; // ETH Received from token sale
         require(ETHReceived > 0, "Negative BNB from selling tokens");
 
-        swapEthForTokens(ETHReceived);
-        emit attacked(msg.sender, ETHReceived);
+        swapEthForTokens(ETHReceived); // Buy tokens for ETH
 
         uint256 finalETHBalance = address(this).balance;
+        require(finalETHBalance == initialETHBalance, "BNB Balance of contract changed");
+
         uint256 finalBalance = piggyToken.balanceOf(address(this));
-        require(finalETHBalance >= initialETHBalance, "BNB Balance of contract decreased");
+
         uint256 tokensReceived = finalBalance - afterBalance;
         require(tokensReceived > 0, "Tokens lost in purchase");
         require(tokensReceived < amount, "Tokens increased after charge and attack");
-        balances[msg.sender] = balances[msg.sender] + tokensReceived;
+
+
+        balances[msg.sender] += tokensReceived;
 
         requestReward(amount);
         players[msg.sender].gamesPlayed += 1;
         players[msg.sender].experience += amount;
         teams[players[msg.sender].team].damagePoints += amount;
+        emit Attack(msg.sender, team, amount, ETHReceived, tokensReceived, initialBalance - finalBalance, initialPlayerBalance - balances[msg.sender]);
     }
 
     function getRandomNumber() private returns (bytes32 requestId) {
         latestRID += 1;
+        emit RandomNumberRequest(msg.sender, bytes32(abi.encodePacked(latestRID)));
         return bytes32(abi.encodePacked(latestRID));
     }
 
@@ -319,6 +363,7 @@ contract piggyGame is Ownable {
         if (requests[requestId].fulfilled) {
             return;
         }
+        emit RandomNumberFulfilled(requests[requestId].requester, requests[requestId].rtype, requestId, randomness);
         requests[requestId].fulfilled = true;
 
         // rtype 1: Booster pack
@@ -327,12 +372,14 @@ contract piggyGame is Ownable {
                 grade: requests[requestId].grade,
                 seed: randomness
             }));
+            emit ReceivedBoosterBack(requests[requestId].requester, requests[requestId].grade, randomness);
         }
         // rtype 1: Team Assignment
         if (requests[requestId].rtype == 2) {
             uint32 teamIndex = uint32(randomness % activeTeams.length);
             players[requests[requestId].requester].team = activeTeams[teamIndex];
             players[requests[requestId].requester].winsBeforeJoin = teams[activeTeams[teamIndex]].wins;
+            emit TeamAssigned(requests[requestId].requester, activeTeams[teamIndex], randomness);
         }
     }
 
@@ -343,6 +390,7 @@ contract piggyGame is Ownable {
         uint8 grade = players[msg.sender].boosterPacks[numPacks-1].grade;
         rewardPlayer(seed, grade);
         players[msg.sender].boosterPacks.pop();
+        emit BoosterPackOpened(msg.sender, grade, seed);
     }
 
     function rewardPlayer(uint256 seed, uint8 grade) private {
@@ -396,12 +444,14 @@ contract piggyGame is Ownable {
             // Mint Common NFT
             uint8 number = getRandomInt(3, seed, nonce) + 1; // 0-3 + 1 = 1-4
             rewardNFT.mint(msg.sender, season, number);
+            emit NFTAwarded(msg.sender, season, number, false);
         }
         if (numRare == 1) {
             nonce +=1;
             // Mint Rare NFT
             uint8 number = getRandomInt(2, seed, nonce) + 5; // 0-2 + 5 = 5-7
             rewardNFT.mint(msg.sender, season, number);
+            emit NFTAwarded(msg.sender, season, number, true);
         }
     }
 
@@ -423,6 +473,7 @@ contract piggyGame is Ownable {
             rewardNFT.forgeBurn(ids[i]); // Burn NFT
         }
         rewardNFT.mint(msg.sender, cardSet, 0); // Card 0 of set is Legendary
+        emit LegendaryForged(msg.sender, cardSet);
     }
     
     function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
@@ -432,6 +483,7 @@ contract piggyGame is Ownable {
             grade3: grade3,
             grade4: grade4
         });
+        emit ThresholdsSet(msg.sender, grade1, grade2, grade3, grade4);
     }
 
     function setRareChance(uint8 grade2, uint8 grade3, uint8 grade4) public onlyOwner {
@@ -440,6 +492,7 @@ contract piggyGame is Ownable {
             grade3: grade3,
             grade4: grade4
         });
+        emit RareChanceSet(msg.sender, grade2, grade3, grade4);
     }
 
     /// @dev Swap tokens for eth
