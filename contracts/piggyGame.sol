@@ -7,31 +7,12 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 
 import "./IBEP20.sol";
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
 interface IRewardNFT is IERC721 {
-    /**
-     * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.
-     */
-    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
-    
-    //minter function 
-    function mintReward(address recipient, uint256 rewardID) external returns (bool);
-    
-    //burn  function 
-    function burn(address from, uint256 rewardID, uint256 amount) external;
-    
-     /**
-     * @dev Returns the amount of tokens of token type `id` owned by `account`.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     */
-    function balanceOf(address account, uint256 id) external view returns (uint256);
+    function mint(address to) external;
 }
 
 contract piggyGame is Ownable {
@@ -100,7 +81,12 @@ contract piggyGame is Ownable {
         uint256 grade4;
     }
 
-    Thresholds public thresholds;
+    Thresholds public thresholds = Thresholds({
+        grade1: 10   * 10**9 * 10**9,
+        grade2: 50   * 10**9 * 10**9,
+        grade3: 100  * 10**9 * 10**9,
+        grade4: 500  * 10**9 * 10**9
+    });
 
     uint256 latestRID = 0;
 
@@ -329,16 +315,19 @@ contract piggyGame is Ownable {
             numCommon = getRandomInt(1, seed, nonce);
         } else if (grade == 2) { // Grade 2: 0 to 1 Common NFTs, 1 in 10 Chance of Rare
             numCommon = getRandomInt(1, seed, nonce);
+
             if (getRandomInt(10, seed, nonce+1) == 10) {
                 numRare = 1;
             }
         } else if (grade == 3) { // Grade 2: 0 to 2 Common NFTs, 1 in 8 Chance of Rare
             numCommon = getRandomInt(2, seed, nonce);
+
             if (getRandomInt(7, seed, nonce+1) == 7) {
                 numRare = 1;
             }
         } else if (grade == 4) { // Grade 2: 1 to 3 Common NFTs, 1 in 5 Chance of Rare
             numCommon = getRandomInt(2, seed, nonce) + 1;
+
             if (getRandomInt(4, seed, nonce+1) == 4) {
                 numRare = 1;
             }
@@ -359,7 +348,7 @@ contract piggyGame is Ownable {
         }
         if (numRare == 1) {
             // Mint Rare NFT
-            rewardNFT.mintReward(msg.sender, 6);
+            rewardNFT.mint(msg.sender);
         }
     }
 
