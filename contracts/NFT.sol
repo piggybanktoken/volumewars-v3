@@ -27,6 +27,12 @@ contract piggyNFT is
 
     mapping(uint256 => NFTMetadata) metadata;
 
+    struct SetMetadata {
+        uint8 totalCards;
+    }
+
+    mapping(uint16 => SetMetadata) sets;
+
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract.
@@ -49,11 +55,21 @@ contract piggyNFT is
     function metadataOf(uint256 id) public view returns (uint16, uint8) {
         return (metadata[id].set, metadata[id].number);
     }
+    function totalCardsOf(uint16 id) public view returns (uint8) {
+        return sets[id].totalCards;
+    }
+    function addSet(uint16 set, uint8 number) public virtual {
+        sets[set].totalCards = number;
+    }
 
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
     }
 
+    function forgeBurn(uint256 id) public {
+        require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to mint");
+        _burn(id);
+    }
     /**
      * @dev Creates a new token for `to`. Its token ID will be automatically
      * assigned (and available on the emitted {IERC721-Transfer} event), and the token
@@ -66,7 +82,7 @@ contract piggyNFT is
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(address to, uint16 set, uint8 number) public virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
+        require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to mint");
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
@@ -86,7 +102,7 @@ contract piggyNFT is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have pauser role to pause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), "RewardNFT: must have pauser role to pause");
         _pause();
     }
 
@@ -100,7 +116,7 @@ contract piggyNFT is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have pauser role to unpause");
+        require(hasRole(PAUSER_ROLE, _msgSender()), "RewardNFT: must have pauser role to unpause");
         _unpause();
     }
 
