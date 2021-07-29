@@ -90,26 +90,6 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
           method="bootsterPackBalanceOf"
           methodArgs={[drizzleState["accounts"][0]]}
         />
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="unPack"
-          labels={["Amount to unpack"]}
-        />
-      <h3>Reroll 10 Common NFTs</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="reRollCommon"
-          labels={[]}
-        />
-      <h3>Reroll 10 Rare NFTs</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="reRollRare"
-          labels={[]}
-        />
       <h2>Operator Game Settings</h2>
       <h3>Current Operator</h3>
         <ContractData
@@ -125,41 +105,6 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
           method="transferOperator"
           labels={["New Operator Address"]}
         />
-      <h3>Set Ease Level</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="setEaseLevel"
-          labels={["Ease Level"]}
-        />
-      <h3>Set Default Chances</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="setDefaultChances"
-          labels={["Common Chance", "Rare Chance", "Legendary Chance"]}
-        />
-        <h3>Set Amount Threshold</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="setAmountThreshold"
-          labels={["Common Threshold", "Rare Threshold", "Legendary Threshold"]}
-        />
-        <h3>Set Reroll Threshold</h3>
-      <ContractForm
-          drizzle={drizzle}
-          contract="piggyGame"
-          method="setRerollThreshold"
-          labels={["Common Threshold", "Rare Threshold"]}
-        />
-        <h3>Set Reroll Chance</h3>
-        <ContractForm
-            drizzle={drizzle}
-            contract="piggyGame"
-            method="setRerollChance"
-            labels={["Common Reroll Chance", "Rare Reroll Chance"]}
-          />
       </div>
       </div>
   )
