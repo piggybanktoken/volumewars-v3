@@ -14,6 +14,8 @@ import "./IBEP20.sol";
 interface IRewardNFT is IERC721 {
     function mint(address to, uint16 set, uint8 number) external;
     function metadataOf(uint256 id) external returns (uint16, uint8);
+    function totalCardsOf(uint16 id) external returns (uint8);
+    function forgeBurn(uint256 id) external;
 }
 
 contract piggyGame is Ownable {
@@ -55,7 +57,8 @@ contract piggyGame is Ownable {
     struct Player {
         uint256 gamesPlayed;
         uint16 season;
-        uint256 team;
+        uint32 team;
+        uint32 winsBeforeJoin;
         uint256 experience;
         BoosterPack[] boosterPacks;
     }
@@ -64,12 +67,16 @@ contract piggyGame is Ownable {
 
     struct Team {
         bool enabled;
-        uint256 wins;
+        uint32 wins;
         uint256 damagePoints;
     }
 
     // Teams
-    mapping(uint256 => Team) public teams;
+    mapping(uint32 => Team) public teams;
+
+    uint32 latestTeam = 0;
+
+    uint32[] activeTeams;
 
     // User Piggy Balance
     mapping(address => uint256) public balances;
@@ -101,8 +108,6 @@ contract piggyGame is Ownable {
     });
 
     uint256 latestRID = 0;
-
-    uint256 latestTeam = 0;
     
     bool public open = false;
 
@@ -143,6 +148,12 @@ contract piggyGame is Ownable {
     function teamOf(address _player) public view returns(uint256){
         return players[_player].team;
     }
+    function playerWins(address _player) public view returns(uint32){
+        uint32 team = players[_player].team;
+        uint32 winsBeforeJoin = players[_player].winsBeforeJoin;
+        require(teams[team].wins >= winsBeforeJoin, "Wins before join higher than total wins");
+        return teams[team].wins - winsBeforeJoin;
+    }
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
     }
@@ -153,9 +164,25 @@ contract piggyGame is Ownable {
         season += 1;
         open = true;
     }
+    function closeSeason() public onlyOwner {
+        open = false;
+        uint256 lowestDamagePoints = teams[activeTeams[0]].damagePoints;
+        uint32 winningTeam = activeTeams[0];
+        for (uint32 i = 0; i < activeTeams.length; i++) {
+            uint256 teamDamagePoints = teams[activeTeams[i]].damagePoints;
+            if (teamDamagePoints < lowestDamagePoints){
+                lowestDamagePoints = teamDamagePoints;
+                winningTeam = activeTeams[i];
+            }
+            teams[activeTeams[i]].damagePoints = 0;
+        }
+        teams[winningTeam].wins += 1;
+    }
+    
     function addTeam() public onlyOwner {
         latestTeam += 1;
         teams[latestTeam].enabled = true;
+        activeTeams.push(latestTeam);
     }
     function withdrawETH(uint256 amount, address payable _to) public onlyOwner {
         _to.transfer(amount);
@@ -226,7 +253,7 @@ contract piggyGame is Ownable {
         require((previousBalance - currentBalance) == amount, "Contract balance decrease greater than amount");
     }
 
-    function attack(uint256 amount, uint256 team) public {
+    function attack(uint256 amount, uint32 team) public {
         require(open, "Game is closed");
         require(season > 0, "Season not set");
         require(players[msg.sender].season == season, "Player has not entered season");
@@ -303,8 +330,9 @@ contract piggyGame is Ownable {
         }
         // rtype 1: Team Assignment
         if (requests[requestId].rtype == 2) {
-            uint256 team = (randomness % latestTeam) + 1;
-            players[requests[requestId].requester].team = team;
+            uint32 teamIndex = uint32(randomness % activeTeams.length);
+            players[requests[requestId].requester].team = activeTeams[teamIndex];
+            players[requests[requestId].requester].winsBeforeJoin = teams[activeTeams[teamIndex]].wins;
         }
     }
 
@@ -363,7 +391,7 @@ contract piggyGame is Ownable {
         uint8 nonce = 10;
         require(numCommon <= 3, "Too many common NFTs generated");
         require(numRare <= 1, "Too many rare NFTs generated");
-        for (uint8 i = 0 ; i < numCommon ; i++) {
+        for (uint8 i = 0 ; i < numCommon; i++) {
             nonce += 1;
             // Mint Common NFT
             uint8 number = getRandomInt(3, seed, nonce) + 1; // 0-3 + 1 = 1-4
@@ -379,6 +407,22 @@ contract piggyGame is Ownable {
 
     function getRandomInt(uint8 max, uint256 seed, uint8 nonce) pure private returns(uint8) {
         return uint8(uint256(keccak256(abi.encodePacked(seed, nonce))) % (max+1));
+    }
+
+    function forgeLegendary(uint256[] calldata ids) public {
+        (uint16 cardSet, uint8 _number) = rewardNFT.metadataOf(ids[0]);
+        require(_number == 1, "First card must be 1");
+        uint8 totalCards = rewardNFT.totalCardsOf(cardSet);
+        require(totalCards == ids.length, "Wrong amount of cards to complete the set");
+
+        for (uint8 i = 0 ; i < totalCards; i++) {
+            require(rewardNFT.ownerOf(ids[i]) == msg.sender, "Sender does not own the NFT");
+            (uint16 set, uint8 number) = rewardNFT.metadataOf(ids[i]);
+            require(set == cardSet, "Card from wrong set");
+            require(number == (i+1), "Wrong card number or order"); // Cards are from 1 to totalCards, i is from 0 to totalCards - 1
+            rewardNFT.forgeBurn(ids[i]); // Burn NFT
+        }
+        rewardNFT.mint(msg.sender, cardSet, 0); // Card 0 of set is Legendary
     }
     
     function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
