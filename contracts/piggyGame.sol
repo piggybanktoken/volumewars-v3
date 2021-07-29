@@ -135,7 +135,7 @@ contract piggyGame is Ownable {
     event TokensPurchased(address indexed player, uint256 amount, uint256 minAmount, uint256 BNBSent);
     event Deposit(address indexed player, uint256 amount);
     event Withdrawal(address indexed player, uint256 amount);
-    event Attack(address indexed player, uint32 indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 TotalBalanceChange, uint256 PlayerBalanceChange);
+    event Attack(address indexed player, uint32 indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 BalanceChange);
     event RandomNumberRequest(address indexed requester, bytes32 id);
     event RandomNumberFulfilled(address indexed requester, uint8 indexed rtype, bytes32 id, uint256 randomness);
     event ReceivedBoosterBack(address indexed requester, uint8 indexed grade, uint256 randomness);
@@ -296,12 +296,10 @@ contract piggyGame is Ownable {
         require(teams[team].enabled, "Team is not enabled");
         require(balances[msg.sender] >= amount, "Insufficient balance");
 
-        uint256 initialPlayerBalance = balances[msg.sender];
         uint256 initialBalance = piggyToken.balanceOf(address(this));
         uint256 initialETHBalance = address(this).balance;
 
         swapTokensForEth(amount); // Sell tokens for ETH
-        balances[msg.sender] -= amount;
 
         uint256 afterBalance = piggyToken.balanceOf(address(this));
         uint256 afterETHBalance = address(this).balance;
@@ -314,23 +312,28 @@ contract piggyGame is Ownable {
 
         swapEthForTokens(ETHReceived); // Buy tokens for ETH
 
-        uint256 finalETHBalance = address(this).balance;
-        require(finalETHBalance == initialETHBalance, "BNB Balance of contract changed");
+        require(address(this).balance == initialETHBalance, "BNB Balance of contract changed");
 
-        uint256 finalBalance = piggyToken.balanceOf(address(this));
-
-        uint256 tokensReceived = finalBalance - afterBalance;
+        uint256 tokensReceived = piggyToken.balanceOf(address(this)) - afterBalance;
         require(tokensReceived > 0, "Tokens lost in purchase");
         require(tokensReceived < amount, "Tokens increased after charge and attack");
+        require(initialBalance - piggyToken.balanceOf(address(this)) > 0, "Piggy balance did not decrease");
+        require(initialBalance - piggyToken.balanceOf(address(this)) < balances[msg.sender], "Player cannot pay for balance decrease");
 
-
-        balances[msg.sender] += tokensReceived;
+        // Change in piggy balance is charged to the player
+        balances[msg.sender] -= initialBalance - piggyToken.balanceOf(address(this));
 
         requestReward(amount);
         players[msg.sender].gamesPlayed += 1;
         players[msg.sender].experience += amount;
         teams[players[msg.sender].team].damagePoints += amount;
-        emit Attack(msg.sender, team, amount, ETHReceived, tokensReceived, initialBalance - finalBalance, initialPlayerBalance - balances[msg.sender]);
+        emit Attack(
+        msg.sender, 
+        team,
+        amount, 
+        ETHReceived,
+        tokensReceived,
+        initialBalance - piggyToken.balanceOf(address(this)));
     }
 
     function getRandomNumber() private returns (bytes32 requestId) {
