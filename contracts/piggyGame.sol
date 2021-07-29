@@ -417,7 +417,7 @@ contract piggyGame is Ownable {
         path[0] = pancakeSwapRouter.WETH();
         path[1] = piggyAddress;
 
-        // make the swap
+        // Make the swap
         pancakeSwapRouter.swapETHForExactTokens{value: EthAmount}(
             minTokens,// get anything we can
             path,
@@ -426,7 +426,7 @@ contract piggyGame is Ownable {
         );
     }
 
-    function inRange(uint256 lowerLimit  , uint256  upperLimit, uint256 value) internal pure returns(bool){
+    function inRange(uint256 lowerLimit, uint256 upperLimit, uint256 value) internal pure returns(bool){
         if(value >= lowerLimit && value <= upperLimit) {
             return true;
         }
