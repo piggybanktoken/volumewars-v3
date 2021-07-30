@@ -1,0 +1,19 @@
+[08:30:04.633] Global cache location '/home/kahr/.cache/typescript/4.1', safe file path '/home/kahr/Code/VolumeWars/app/node_modules/typescript/lib/typingSafeList.json', types map path /home/kahr/Code/VolumeWars/app/node_modules/typescript/lib/typesMap.json
+[08:30:04.634] Processing cache location '/home/kahr/.cache/typescript/4.1'
+[08:30:04.634] Trying to find '/home/kahr/.cache/typescript/4.1/package.json'...
+[08:30:04.634] Loaded content of '/home/kahr/.cache/typescript/4.1/package.json': {"private":true,"dependencies":{"types-registry":"^0.1.551"}}
+[08:30:04.635] Loaded content of '/home/kahr/.cache/typescript/4.1/package-lock.json'
+[08:30:04.635] Finished processing cache location '/home/kahr/.cache/typescript/4.1'
+[08:30:04.635] Process id: 32109
+[08:30:04.635] NPM location: /usr/bin/npm (explicit '--npmLocation' not  provided)
+[08:30:04.635] validateDefaultNpmLocation: false
+[08:30:04.635] Npm config file: /home/kahr/.cache/typescript/4.1/package.json
+[08:30:04.635] Updating types-registry npm package...
+[08:30:04.635] Exec: /usr/bin/npm install --ignore-scripts types-registry@latest
+[08:30:05.446]     Succeeded. stdout:
+    
+    up to date, audited 2 packages in 670ms
+
+found 0 vulnerabilities
+
+[08:30:05.446] Updated types-registry npm package
