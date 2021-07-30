@@ -5,8 +5,9 @@ import { Contract } from '@ethersproject/contracts'
 import { BigNumber } from '@ethersproject/bignumber'
 
 import * as abi from '../contracts/piggyGame.json'
-
+import * as nftABI from '../contracts/piggyNFT.json'
 export const gameAddress = abi.networks[56].address
+export const nftAddress = nftABI.networks[56].address
 
 function getContract(): ethers.Contract {
     const wprovider = new JsonRpcProvider("http://localhost:8545")
