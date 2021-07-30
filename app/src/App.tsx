@@ -54,25 +54,25 @@ function App() {
                     <Link to="/drizzle" onClick={closeMenu}>
                       <Menu.Item as='a'>
                         Drizzle
-            </Menu.Item>
+                      </Menu.Item>
                     </Link>
 
                     <Link to="/home" onClick={closeMenu}>
                       <Menu.Item as='a'>
                         Home
-            </Menu.Item>
+                      </Menu.Item>
                     </Link>
 
                     <Link to="/war" onClick={closeMenu}>
                       <Menu.Item as='a'>
                         War
-            </Menu.Item>
+                      </Menu.Item>
                     </Link>
 
                     <Link to="/nfts" onClick={closeMenu}>
                       <Menu.Item as='a'>
                         NFT Collection
-            </Menu.Item>
+                      </Menu.Item>
                     </Link>
                   </Sidebar>
 
@@ -82,10 +82,10 @@ function App() {
                         <ViewDataComponent drizzle={drizzle} drizzleState={drizzleState} />
                       </Route>
                       <Route path="/home">
-                        <Dashboard />
+                        <Dashboard drizzle={drizzle} drizzleState={drizzleState} />
                       </Route>
                       <Route path="/war">
-                        <War />
+                        <War drizzle={drizzle} drizzleState={drizzleState}/>
                       </Route>
                       <Route path="/nfts">
                         <NFTCollection />

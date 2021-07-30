@@ -1,7 +1,9 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Grid, Header } from 'semantic-ui-react'
 import { BalanceDisplay, DepositButton } from './balance'
 import TeamDisplay from './teamDisplay'
+import { Drizzle } from "@drizzle/store";
+
 /*
  * TODO:
  * - Hook up to smart contract
@@ -21,7 +23,7 @@ function Team() {
     )
 }
 
-export function Dashboard() {
+export function Dashboard({ drizzle, drizzleState }: {drizzle: Drizzle, drizzleState: any}) {
     return (
         <div>
             <Header size='huge' textAlign="center" className="header-margin-1">Dashboard</Header>
@@ -35,7 +37,7 @@ export function Dashboard() {
 
                 <Grid.Column textAlign="center">
                     <Header size="large" className="header-margin-1">Your Balance:</Header>
-                    <BalanceDisplay />
+            <BalanceDisplay drizzle={drizzle} drizzleState={drizzleState}/>
                     <DepositButton />
                 </Grid.Column>
             </Grid>

@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@drizzle/react-components": "^1.5.1",
-    "@drizzle/react-plugin": "^1.5.1",
+    "@drizzle/react-plugin": "^1.5.3",
     "@drizzle/store": "^1.5.1",
     "@pancakeswap/sdk": "^2.3.2",
     "@reduxjs/toolkit": "^1.5.1",
