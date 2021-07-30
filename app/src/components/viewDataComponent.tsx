@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { newContextComponents } from "@drizzle/react-components";
 import { Drizzle } from "@drizzle/store";
 import { buyTokensAPI, PANCAKE_ROUTER_V2 } from "../app/swap";
 import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
 import  { deposit, withdraw, buyTokens, attack, gameBalanceOf } from '../app/piggyGame'
-import { gameAddress } from "../app/piggyGame";
+import { gameAddress, nftAddress } from "../app/piggyGame";
 import { Button, Checkbox, Form } from 'semantic-ui-react'
-
+import { DrizzleCtx } from "..";
 const { AccountData, ContractData, ContractForm } = newContextComponents;
 
-export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle, drizzleState: any}) {
+export function ViewDataComponent() {
+  const { drizzle, drizzleState, initialized } = useContext(DrizzleCtx)
   // destructure drizzle and drizzleState from props
   const [piggyBalance, setPiggyBalance] = useState("0")
   async function buyAndApproveTokens() {
@@ -22,9 +23,12 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
     setPiggyBalance(balance)
     return balance
   }
+  const game = (drizzle as any).contracts.piggyGame
   async function initialSettings() {
-    const game = (drizzle as any).contracts.piggyGame
-    const stackId = game.methods.updatePancakeSwapRouter.cacheSend(PANCAKE_ROUTER_V2, tokenAddress, {"from": drizzleState["accounts"][0], "gas": 999999})
+    // game.methods.updatePancakeSwapRouter.cacheSend(PANCAKE_ROUTER_V2, tokenAddress, {"from": drizzleState["accounts"][0], "gas": 999999})
+    game.methods.updateNFTAddress.cacheSend(nftAddress)
+    game.methods.openSeason.cacheSend()
+    game.methods.buyTokens.cacheSend("150000000000000000000", { from: drizzleState["accounts"][0], value: "50000000000000000000"})
   }
   useEffect(() =>{
     getPiggyBalance()
@@ -42,34 +46,29 @@ export function ViewDataComponent ({ drizzle, drizzleState }: {drizzle: Drizzle,
         <Button onClick={buyAndApproveTokens}>Buy Tokens and Approve</Button>
         <br></br>
         <h3>Current Balance: {piggyBalance} $PIGGY </h3>
+        <h3>Current Game Balance</h3>
+        <h4>
+          <ContractData
+            drizzle={drizzle}
+            drizzleState={drizzleState}
+            contract="piggyGame"
+            method="balanceOf"
+            methodArgs={[drizzleState["accounts"][0]]}
+          />
+        </h4>
+        <hr></hr>
         <Button onClick={initialSettings}>Game Setup</Button>
         <Button onClick={() => {transfer(gameAddress, "50000000000000000").then(() => getPiggyBalance())}}>Send Piggy</Button>
         <Button onClick={() => {deposit("50000000000000000").then(() => getPiggyBalance())}} >Deposit</Button>
         <Button onClick={() => {balanceOf(gameAddress).then((res) => console.log(res))}} >Get Game Balance</Button>
         <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => console.log(res))}} >Get User Game Balance</Button>
         <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => withdraw(res))}} >Withdraw All</Button>
+        <Button onClick={() => {game.methods.buyTokens.cacheSend("1500000000000000000000", { from: drizzleState["accounts"][0], value: "50000000000000000000"})}}>Buy Tokens</Button>
         <Button onClick={() => {attack("25000000000000000").then((res) => console.log(res))}} >Attack</Button>
-        <Button onClick={() => {buyTokens("1","25000000000000000").then((res) => console.log(res))}} >Attack</Button>
         <div className="section">
       </div>
       <div>
       <h2>Game</h2>
-      {/* <h3>Booster packs owned</h3>
-      <ContractData
-          drizzle={drizzle}
-          drizzleState={drizzleState}
-          contract="piggyGame"
-          method="bootsterPackBalanceOf"
-          methodArgs={[drizzleState["accounts"][0]]}
-        />
-      <h3>Games Played</h3>
-      <ContractData
-          drizzle={drizzle}
-          drizzleState={drizzleState}
-          contract="piggyGame"
-          method="totalgamePlayedOf"
-          methodArgs={[drizzleState["accounts"][0]]}
-        /> */}
       
       <h3>Deposit Tokens</h3>
       <p>
