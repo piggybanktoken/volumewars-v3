@@ -3,6 +3,7 @@ import { Grid, Button, Label, Header, Container, Input, Segment, Modal, Image } 
 import { BalanceDisplay } from './balance';
 import TeamDisplay from './teamDisplay';
 import { Drizzle } from "@drizzle/store";
+import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 // TODO unstub attack button
 // TODO get and render teams
@@ -35,7 +36,15 @@ function RenderTeam(props: { team: number }) {
 }
 
 
-export function War({ drizzle, drizzleState }: {drizzle: Drizzle, drizzleState: any}) {
+export function War() {
+    const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
+    const {
+        drizzle,
+        useCacheCall,
+        useCacheEvents,
+        useCacheSend
+    } = drizzleReactHooks.useDrizzle()
+
     enum AttackState {
         Closed = 1,
         Confirm,

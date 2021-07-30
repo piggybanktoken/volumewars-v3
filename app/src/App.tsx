@@ -13,15 +13,24 @@ import {
 } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from './app/hooks'
 import { selectVisible, setMenuVisible } from './features/UISlice'
-import { DrizzleCtx } from "./index"
+
+import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 
 function App() {
   const visible = useAppSelector(selectVisible)
   const dispatch = useAppDispatch()
   function closeMenu() { dispatch(setMenuVisible(false)) }
-  const { drizzle, drizzleState, initialized } = useContext(DrizzleCtx)
-  
+
+  const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState)
+  const initialized = drizzleReactHooks.useDrizzleState((state: any) => state.drizzleStatus.initialized)
+  const {
+    drizzle,
+    useCacheCall,
+    useCacheEvents,
+    useCacheSend
+  } = drizzleReactHooks.useDrizzle()
+
   return (
     <div>
       <Router>
@@ -38,7 +47,10 @@ function App() {
             fluid
             size="huge"
           >
-            <Menu.Item as={Link} to="/drizzle" onClick={closeMenu}>
+              <Menu.Item as={Link} to="/home" onClick={closeMenu}>
+                Home
+              </Menu.Item>
+              <Menu.Item as={Link} to="/drizzle" onClick={closeMenu}>
                 Drizzle
               </Menu.Item>
               <Menu.Item as={Link} to="/war" onClick={closeMenu}>
@@ -55,10 +67,10 @@ function App() {
                 {initialized && <ViewDataComponent />}
               </Route>
               <Route path="/home">
-                {initialized && <Dashboard drizzle={drizzle} drizzleState={drizzleState} />}
+                {initialized && <Dashboard />}
               </Route>
               <Route path="/war">
-                {initialized && <War drizzle={drizzle} drizzleState={drizzleState}/>}
+                {initialized && <War/>}
               </Route>
               <Route path="/nfts">
                 {initialized && <NFTCollection />}

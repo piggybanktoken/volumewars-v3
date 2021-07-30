@@ -7,6 +7,7 @@ import * as serviceWorker from './serviceWorker'
 import drizzleOptions from "./drizzleOptions"
 import { DrizzleContext } from "@drizzle/react-plugin"
 import { Drizzle } from "@drizzle/store"
+import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 import 'semantic-ui-css/semantic.min.css'
 import './style.css'
@@ -16,19 +17,10 @@ const drizzle = new Drizzle(drizzleOptions as any);
 export const DrizzleCtx = React.createContext(DrizzleContext)
 
 ReactDOM.render(
-  
     <Provider store={store}>
-      <DrizzleContext.Provider drizzle={drizzle}>
-        <DrizzleContext.Consumer>
-          {(drizzleContext: any) => {
-            return (
-              <DrizzleCtx.Provider value={drizzleContext}>
-                <App />
-              </DrizzleCtx.Provider>
-            )
-          }}
-        </DrizzleContext.Consumer>
-      </DrizzleContext.Provider>
+      <drizzleReactHooks.DrizzleProvider drizzle={drizzle}>
+        <App />
+      </drizzleReactHooks.DrizzleProvider>
     </Provider>,
   document.getElementById('root')
 )

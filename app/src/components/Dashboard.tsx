@@ -3,6 +3,7 @@ import { Grid, Header } from 'semantic-ui-react'
 import { BalanceDisplay, DepositButton } from './balance'
 import TeamDisplay from './teamDisplay'
 import { Drizzle } from "@drizzle/store";
+import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 /*
  * TODO:
@@ -23,7 +24,14 @@ function Team() {
     )
 }
 
-export function Dashboard({ drizzle, drizzleState }: {drizzle: Drizzle, drizzleState: any}) {
+export function Dashboard() {
+    const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
+    const {
+        drizzle,
+        useCacheCall,
+        useCacheEvents,
+        useCacheSend
+    } = drizzleReactHooks.useDrizzle()
     return (
         <div>
             <Header size='huge' textAlign="center" className="header-margin-1">Dashboard</Header>

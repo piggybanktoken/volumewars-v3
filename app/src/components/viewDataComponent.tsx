@@ -6,11 +6,19 @@ import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
 import  { deposit, withdraw, buyTokens, attack, gameBalanceOf } from '../app/piggyGame'
 import { gameAddress, nftAddress } from "../app/piggyGame";
 import { Button, Checkbox, Form } from 'semantic-ui-react'
-import { DrizzleCtx } from "..";
+import { drizzleReactHooks } from '@drizzle/react-plugin'
+
 const { AccountData, ContractData, ContractForm } = newContextComponents;
 
 export function ViewDataComponent() {
-  const { drizzle, drizzleState, initialized } = useContext(DrizzleCtx)
+  const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
+  const {
+    drizzle,
+    useCacheCall,
+    useCacheEvents,
+    useCacheSend
+  } = drizzleReactHooks.useDrizzle()
+
   // destructure drizzle and drizzleState from props
   const [piggyBalance, setPiggyBalance] = useState("0")
   async function buyAndApproveTokens() {
@@ -31,6 +39,7 @@ export function ViewDataComponent() {
     game.methods.buyTokens.cacheSend("150000000000000000000", { from: drizzleState["accounts"][0], value: "50000000000000000000"})
   }
   useEffect(() =>{
+    console.log(drizzleState)
     getPiggyBalance()
   },[])
   return (

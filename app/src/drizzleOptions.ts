@@ -1,7 +1,6 @@
 import Web3 from "web3"
 import piggyGame from "./contracts/piggyGame.json"
-import WBProfileNFT from "./contracts/WBProfileNFT.json"
-import boosterNFT from "./contracts/boosterNFT.json"
+import piggyNFT from "./contracts/piggyNFT.json"
 
 const options = {
   web3: {
