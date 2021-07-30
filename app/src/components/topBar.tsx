@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Button, Image, Grid, Segment, Icon, Label } from 'semantic-ui-react'
-import NavMenu from "./menu";
-
+import { Button, Image, Grid, Segment, Icon, Label, Menu, Container } from 'semantic-ui-react'
+import { drizzleReactHooks } from '@drizzle/react-plugin'
+import { useAppSelector, useAppDispatch } from '../app/hooks'
+import { selectVisible, setMenuVisible } from '../features/UISlice'
 /*
  * TODO:
  * - Hook up to smart contract
@@ -18,23 +19,7 @@ function Username() {
     )
 }
 
-function Level() {
-    const [level, setLevel] = useState(0)
-    return (
-        <Label size="big">
-            {level}
-        </Label>
-    )
-}
 
-function UserIndicator() {
-    return (
-        <div>
-            <Username />
-            <Level />
-        </div>
-    )
-}
 
 function ConnectWalletButton() {
     return (
@@ -55,16 +40,36 @@ function UserProfilePicture() {
     )
 }
 
-export function TopBar() {
+function Balance() {
+    const accounts = drizzleReactHooks.useDrizzleState((state: any) => state.accounts)
+    const { useCacheCall } = drizzleReactHooks.useDrizzle()
+    const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
+    function shortBalance() {
+        if (balance) {
+            return balance.toString().slice(0,-9).slice(0, -3)
+        }
+        return "0"
+    }
     return (
-        <Segment>
-            <Grid columns={4} container={true}>
-                <Grid.Column key={5} width="1" verticalAlign='middle'><NavMenu /> </Grid.Column>
-                <Grid.Column key={2} floated='left' verticalAlign='middle'>
-                    <UserIndicator />
-                </Grid.Column>
-                <Grid.Column key={3} floated='right' verticalAlign='middle'><ConnectWalletButton /></Grid.Column>
-            </Grid>
-        </Segment>
+        <span>
+            War Pigs: {shortBalance()} K
+        </span>
+    )
+}
+
+export function TopBar() {
+    const initialized = drizzleReactHooks.useDrizzleState((state: any) => state.drizzleStatus.initialized)
+    const visible = useAppSelector(selectVisible)
+    const dispatch = useAppDispatch()
+    return (
+        <Menu size='large'>
+          <Container>
+            <Menu.Item icon="angle double down" onClick={() => dispatch(setMenuVisible(!visible))}></Menu.Item>
+            {initialized && <Menu.Item><Balance/></Menu.Item>}
+            <Menu.Item position='right'>
+                {initialized ? "Connected" : "Connect Wallet"}
+            </Menu.Item>
+          </Container>
+        </Menu>
     )
 }
