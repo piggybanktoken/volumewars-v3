@@ -29,6 +29,7 @@ contract piggyNFT is
 
     struct SetMetadata {
         uint8 totalCards;
+        bool enabled;
     }
 
     mapping(uint16 => SetMetadata) sets;
@@ -58,8 +59,10 @@ contract piggyNFT is
     function totalCardsOf(uint16 id) public view returns (uint8) {
         return sets[id].totalCards;
     }
-    function addSet(uint16 set, uint8 number) public virtual {
+    function addSet(uint16 set, uint8 number) public {
+        require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to add sets");
         sets[set].totalCards = number;
+        sets[set].enabled = true;
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
@@ -83,7 +86,8 @@ contract piggyNFT is
      */
     function mint(address to, uint16 set, uint8 number) public virtual {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to mint");
-
+        require(sets[set].enabled, "RewardNFT: Set does not exist");
+        require(number <= sets[set].totalCards, "RewardNFT: Card does not exist in set");
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         _mint(to, _tokenIdTracker.current());
