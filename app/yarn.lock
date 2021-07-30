@@ -1712,7 +1712,7 @@
     prop-types "^15.7.2"
     react "^16.8.6"
 
-"@drizzle/react-plugin@^1.5.1":
+"@drizzle/react-plugin@^1.5.3":
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/@drizzle/react-plugin/-/react-plugin-1.5.3.tgz#cb3bb0fc3a8d74076c196db16d4084ad340cf240"
   integrity sha512-UT58IMGcSRk0Opcs7U29sEX1jWXaTNhE5RwHrHD6wTYv2zuS3bXfK3q+ojwLfWRnrcBn0MsulRm/FnJ3bD4TyQ==

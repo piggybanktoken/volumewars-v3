@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Grid, Button, Label, Header, Container, Input, Segment, Modal, Image } from 'semantic-ui-react';
 import { BalanceDisplay } from './balance';
 import TeamDisplay from './teamDisplay';
+import { Drizzle } from "@drizzle/store";
 
-// TODO unstub balance
 // TODO unstub attack button
 // TODO get and render teams
 // TODO input validation
@@ -35,7 +35,7 @@ function RenderTeam(props: { team: number }) {
 }
 
 
-export function War() {
+export function War({ drizzle, drizzleState }: {drizzle: Drizzle, drizzleState: any}) {
     enum AttackState {
         Closed = 1,
         Confirm,
@@ -69,7 +69,7 @@ export function War() {
                         <Header size="small" className="header-margin-1">
                             Balance:
                     </Header>
-                        <BalanceDisplay />
+                        <BalanceDisplay drizzle={drizzle} drizzleState={drizzleState}/>
                         <Input placeholder='Attack Size' onChange={(e => setSize(parseInt(e.target.value)))} />
                     </Segment>
 
