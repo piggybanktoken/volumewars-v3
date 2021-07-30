@@ -16,6 +16,7 @@ interface IRewardNFT is IERC721 {
     function metadataOf(uint256 id) external returns (uint16, uint8);
     function totalCardsOf(uint16 id) external returns (uint8);
     function forgeBurn(uint256 id) external;
+    function addSet(uint16 set, uint8 number) external;
 }
 
 contract piggyGame is Ownable {
@@ -150,6 +151,12 @@ contract piggyGame is Ownable {
     function totalBalance() public view returns (uint256) {
         return piggyToken.balanceOf(address(this));
     }
+    function isGameOpen() public view returns (bool) {
+        return open;
+    }
+    function currentSeason() public view returns (uint16) {
+        return season;
+    }
     function balanceOf(address _player) public view returns (uint256) {
         return balances[_player];
     }
@@ -177,8 +184,10 @@ contract piggyGame is Ownable {
         emit SetSeason(msg.sender, season);
     }
     function openSeason() public onlyOwner {
+        require(open == false, "Season currently open");
         season += 1;
         open = true;
+        rewardNFT.addSet(season, 7);
         emit SetSeason(msg.sender, season);
         emit SeasonOpen(msg.sender, season);
         emit SetOpen(msg.sender, open);
