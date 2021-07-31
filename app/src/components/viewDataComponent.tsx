@@ -74,7 +74,7 @@ export function ViewDataComponent() {
         <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => console.log(res))}} >Get User Game Balance</Button>
         <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => withdraw(res))}} >Withdraw All</Button>
         <Button onClick={() => {buyTokens("10", "50000000000000") }}>Buy Tokens</Button>
-        {/* <Button onClick={() => {attack("25000000000000000").then((res) => console.log(res))}} >Attack</Button> */}
+        <Button onClick={() => {attack("25000000000000000", "2").then((res) => console.log(res))}} >Attack</Button>
         <div className="section">
       </div>
       <div>
