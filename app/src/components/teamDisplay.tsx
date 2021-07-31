@@ -1,22 +1,20 @@
 import React from 'react'
 import { Card, Icon, Image } from 'semantic-ui-react'
+import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 // XXX Should this do its own damagePoints/image URL fetching?
 
 export default function TeamDisplay(props: {
-    team: number,
-    url?: string,
-    damagePoints?: number
+    team: string, ownTeam: boolean
 }) {
-    let {team, url, damagePoints} = props
-    if (!url)
-        url = "https://react.semantic-ui.com/images/avatar/large/matthew.png"
-    if (!damagePoints)
-        damagePoints = 1874
-
+    let {team, ownTeam} = props
+    const {
+        useCacheCall,
+    } = drizzleReactHooks.useDrizzle()
+    const damagePoints = useCacheCall('piggyGame', 'teamDamageOf', team)
     return (
         <Card>
-            <Image src={url} />
+            <Image src={"https://react.semantic-ui.com/images/avatar/large/matthew.png"} />
             <Card.Content>
                 <Card.Header>Team {team}</Card.Header>
                 <Card.Meta>
@@ -24,7 +22,7 @@ export default function TeamDisplay(props: {
                 </Card.Meta>
                 <Card.Description>
                     <p>
-                        should there be something here?
+                        {ownTeam ? "This is your team": "This is an opposing team"}
                     </p>
                 </Card.Description>
             </Card.Content>

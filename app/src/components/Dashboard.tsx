@@ -18,10 +18,7 @@ function PrizePool() {
 function Team() {
     const [teamID, setTeam] = useState(2)
     const [teamDamage, setDamage] = useState(915139)
-    return (
-        <TeamDisplay team={teamID}
-                     damagePoints={teamDamage}/>
-    )
+    return <div></div>
 }
 
 export function Dashboard() {

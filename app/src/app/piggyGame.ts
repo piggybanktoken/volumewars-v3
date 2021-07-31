@@ -18,8 +18,9 @@ function getContract(): ethers.Contract {
             'function deposit(uint256 amount) public',
             'function withdraw(uint256 amount) public',
             'function buyTokens(uint256 minTokens) public payable',
-            'function attack(uint256 amount) public',
-            'function balanceOf(address player) public view returns (uint256)'
+            'function attack(uint256 amount, uint32 team) public',
+            'function balanceOf(address player) public view returns (uint256)',
+            'function join() public payable'
         ],
         signer
     )
@@ -48,9 +49,9 @@ export async function buyTokens(ETHAmount: string, minTokens: string) {
     console.log(await tx.wait())
 }
 
-export async function attack(amount: string) {
+export async function attack(amount: string, team: string) {
     const game = getContract()
-    const tx = await game.attack(amount)
+    const tx = await game.attack(amount, team)
     console.log(tx)
     console.log(await tx.wait())
 }
@@ -58,4 +59,13 @@ export async function attack(amount: string) {
 export async function gameBalanceOf(account: string): Promise<string> {
     const game = getContract()
     return (await game.balanceOf(account)).toString()
+}
+
+export async function join() {
+    const game = getContract()
+    const tx = await game.join(
+        { gasLimit: ethers.utils.hexlify(300000), value: utils.parseEther("0.1") }
+    )
+    console.log(tx)
+    console.log(await tx.wait())
 }

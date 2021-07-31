@@ -36,6 +36,8 @@ export function ViewDataComponent() {
     // game.methods.updatePancakeSwapRouter.cacheSend(PANCAKE_ROUTER_V2, tokenAddress, {"from": drizzleState["accounts"][0], "gas": 999999})
     game.methods.updateNFTAddress.cacheSend(nftAddress)
     game.methods.openSeason.cacheSend()
+    game.methods.addTeam.cacheSend({"from": drizzleState["accounts"][0], "gas": 999999})
+    game.methods.addTeam.cacheSend({"from": drizzleState["accounts"][0], "gas": 999999})
   }
   useEffect(() =>{
     console.log(drizzleState)
@@ -72,7 +74,7 @@ export function ViewDataComponent() {
         <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => console.log(res))}} >Get User Game Balance</Button>
         <Button onClick={() => {gameBalanceOf(drizzleState["accounts"][0]).then((res) => withdraw(res))}} >Withdraw All</Button>
         <Button onClick={() => {buyTokens("10", "50000000000000") }}>Buy Tokens</Button>
-        <Button onClick={() => {attack("25000000000000000").then((res) => console.log(res))}} >Attack</Button>
+        {/* <Button onClick={() => {attack("25000000000000000").then((res) => console.log(res))}} >Attack</Button> */}
         <div className="section">
       </div>
       <div>

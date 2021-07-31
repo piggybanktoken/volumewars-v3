@@ -1,7 +1,7 @@
 import React, {useEffect, useState } from 'react'
 import { Button, Header, Image, Modal, Input } from 'semantic-ui-react'
 import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
-import  { deposit, withdraw, buyTokens, attack, gameBalanceOf, gameAddress } from '../app/piggyGame'
+import  { deposit, gameAddress } from '../app/piggyGame'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
 
@@ -20,6 +20,7 @@ export function DepositModal() {
         const baseUnits = piggyToBaseUnits(amount)
         await approve(gameAddress, baseUnits)
         await deposit(baseUnits)
+        setOpen(false)
     }
 
     useEffect(() => {

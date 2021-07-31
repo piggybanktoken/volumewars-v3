@@ -23,6 +23,7 @@ function App() {
   function closeMenu() { dispatch(setMenuVisible(false)) }
 
   const initialized = drizzleReactHooks.useDrizzleState((state: any) => state.drizzleStatus.initialized)
+
   return (
     <div>
       <Router>
@@ -55,9 +56,6 @@ function App() {
 
           <Sidebar.Pusher>
             <Switch>
-              <Route path="/">
-                {initialized && <War />}
-              </Route>
               <Route path="/drizzle">
                 {initialized && <ViewDataComponent />}
               </Route>
