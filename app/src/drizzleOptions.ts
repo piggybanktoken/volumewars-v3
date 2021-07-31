@@ -7,7 +7,7 @@ const options = {
     block: false,
     customProvider: new Web3("ws://localhost:8545"),
   },
-  contracts: [piggyGame],
+  contracts: [piggyGame, piggyNFT],
   // events: {
   //   SimpleStorage: ["StorageSet"],
   // },
