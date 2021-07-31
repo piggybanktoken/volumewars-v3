@@ -22,15 +22,7 @@ function App() {
   const dispatch = useAppDispatch()
   function closeMenu() { dispatch(setMenuVisible(false)) }
 
-  const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState)
   const initialized = drizzleReactHooks.useDrizzleState((state: any) => state.drizzleStatus.initialized)
-  const {
-    drizzle,
-    useCacheCall,
-    useCacheEvents,
-    useCacheSend
-  } = drizzleReactHooks.useDrizzle()
-
   return (
     <div>
       <Router>

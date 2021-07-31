@@ -1,16 +1,14 @@
-import React, { useState } from "react";
-import { Grid, Button, Label, Header, Container, Input, Segment, Modal, Image } from 'semantic-ui-react';
-import TeamDisplay from './teamDisplay';
+import React, { useState } from "react"
+import { Grid, Button, Label, Header, Container, Input, Segment, Modal, Image } from 'semantic-ui-react'
+import TeamDisplay from './teamDisplay'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { DepositModal } from './depositModal'
 import { BuyModal } from './buyModal'
-import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
+import { AttackModal } from './attackModal'
 
-// TODO unstub attack button
-// TODO get and render teams
-// TODO input validation
-// - balance sufficient
-// - not attacking own team
+import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils'
+import { useAppSelector, useAppDispatch } from '../app/hooks'
+import { openAttackModal, closeAttackModal } from '../features/UISlice'
 
 function WarEnabled() {
     // TODO stub
@@ -50,6 +48,9 @@ export function War() {
     const season = useCacheCall('piggyGame', 'currentSeason')
     const gameOpen = useCacheCall('piggyGame', 'isGameOpen')
     const convertedBalance = baseUnitsToPiggy(balance.toString())
+
+    const dispatch = useAppDispatch()
+
     enum AttackState {
         Closed = 1,
         Confirm,
@@ -94,7 +95,7 @@ export function War() {
                             {teams.map((tnumber) =>
                                 <Grid.Column key={tnumber}>
                                     <RenderTeam team={tnumber} />
-                                    <Button fluid negative onClick={() => startAttack(tnumber)}>Attack!</Button>
+                                    <Button fluid negative onClick={() => dispatch(openAttackModal(tnumber.toString()))}>Attack!</Button>
                                 </Grid.Column>
                             )}
 
@@ -103,7 +104,7 @@ export function War() {
 
                 </Grid.Column>
             </Grid>
-
+            <AttackModal />
             <Modal
                 onClose={() => setModalState(AttackState.Closed)}
                 onOpen={() => setModalState(AttackState.Confirm)}
