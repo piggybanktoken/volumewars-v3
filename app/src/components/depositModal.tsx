@@ -10,7 +10,6 @@ export function DepositModal() {
     const [amount, setAmount] = useState("0")
     const [piggyBalance, setPiggyBalance] = useState("0")
     const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
-    const state = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.contracts.piggyGame.teams)
     async function getPiggyBalance() {
         const balance = await balanceOf(accounts[0])
         const piggyNumber = baseUnitsToPiggy(balance)
