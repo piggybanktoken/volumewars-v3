@@ -10,38 +10,10 @@ import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { openAttackModal, closeAttackModal } from '../features/UISlice'
 
-function WarEnabled() {
-    // TODO stub
-    const [war, setWar] = useState(true)
-    return war
-}
-
-function WarText() {
-    const war = WarEnabled()
-    if (war) {
-        return (<span className='warEnabled'>ENABLED</span>)
-    } else {
-        return (<span className='warDisabled'>DISABLED</span>)
-    }
-}
-
-function RenderTeam(props: { team: number }) {
-    // TODO stub
-    return (
-        <div>
-            <TeamDisplay team={props.team}/>
-        </div>
-    )
-}
-
-
 export function War() {
     const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
     const {
-        drizzle,
         useCacheCall,
-        useCacheEvents,
-        useCacheSend
     } = drizzleReactHooks.useDrizzle()
     const accounts = drizzleReactHooks.useDrizzleState((state: any) => state.accounts)
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
@@ -58,7 +30,7 @@ export function War() {
         <div>
             <Segment>
                 <Header size="huge" textAlign="center">War Room</Header>
-                <Header size="medium" className="header-margin-1" textAlign="center">Season {season} is currently {gameOpen ? "OPEN" : "CLOSED"}</Header>
+                <Header size="medium" className="header-margin-1" textAlign="center">Season {season} is currently {gameOpen ? <span className='warEnabled'>open</span> : <span className='warDisabled'>closed</span>}</Header>
             </Segment>
             <Grid columns={1} container={true}>
                 <Grid.Column textAlign="center">
@@ -71,21 +43,21 @@ export function War() {
                         </Header>
                         <DepositModal /> <BuyModal />
                     </Segment>
-
                     <Segment>
                         <Grid columns={nteams} container={true}>
                             {teams.map((tnumber) =>
                                 <Grid.Column key={tnumber}>
-                                    <RenderTeam team={tnumber} />
+                                    <div>
+                                        <TeamDisplay team={tnumber}/>
+                                    </div>
                                     <Button fluid negative onClick={() => dispatch(openAttackModal(tnumber.toString()))}>Attack!</Button>
                                 </Grid.Column>
                             )}
                         </Grid>
                     </Segment>
-
                 </Grid.Column>
             </Grid>
-            <AttackModal />
+        <AttackModal />
         </div>
     )
 }

@@ -8,7 +8,7 @@ export default function TeamDisplay(props: {
     url?: string,
     damagePoints?: number
 }) {
-    let { team, url, damagePoints } = props
+    let {team, url, damagePoints} = props
     if (!url)
         url = "https://react.semantic-ui.com/images/avatar/large/matthew.png"
     if (!damagePoints)
