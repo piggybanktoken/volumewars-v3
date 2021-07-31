@@ -70,9 +70,9 @@ contract piggyGame is Ownable {
     // Teams
     mapping(uint32 => Team) public teams;
 
-    uint32 latestTeam = 0;
+    uint32 public latestTeam = 0;
 
-    uint32[] activeTeams;
+    uint32[] public activeTeams;
 
     // User Piggy Balance
     mapping(address => uint256) public balances;

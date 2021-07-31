@@ -63,6 +63,9 @@ function App() {
 
           <Sidebar.Pusher>
             <Switch>
+              <Route path="/">
+                {initialized && <War />}
+              </Route>
               <Route path="/drizzle">
                 {initialized && <ViewDataComponent />}
               </Route>

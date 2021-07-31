@@ -43,3 +43,16 @@ export async function buyTokensAPI(amount: number, recipient: string){
     console.log(tx)
     console.log(await tx.wait())
 }
+
+export async function tokenQuote(amount: number): Promise<[string, string]> {
+    const wprovider = new JsonRpcProvider("http://localhost:8545")
+    const pair = await Fetcher.fetchPairData(PIGGY, WETH[PIGGY.chainId], wprovider)
+    const route = new Route([pair], WETH[PIGGY.chainId])
+    const trade = new Trade(route, new TokenAmount(WETH[PIGGY.chainId], utils.parseEther(amount.toString()).toString()), TradeType.EXACT_INPUT)
+    const slippageTolerance = new Percent('100', '10000') // 1600 bips, or 16%
+
+    // Transaction parameters
+    const amountOutMin = trade.minimumAmountOut(slippageTolerance).raw
+    const value = trade.inputAmount.raw
+    return [value.toString(), amountOutMin.toString()]
+}

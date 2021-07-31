@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Grid, Button, Label, Header, Container, Input, Segment, Modal, Image } from 'semantic-ui-react';
-import { BalanceDisplay } from './balance';
 import TeamDisplay from './teamDisplay';
-import { Drizzle } from "@drizzle/store";
 import { drizzleReactHooks } from '@drizzle/react-plugin'
+import { DepositModal } from './depositModal'
+import { BuyModal } from './buyModal'
+import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
 
 // TODO unstub attack button
 // TODO get and render teams
@@ -44,7 +45,11 @@ export function War() {
         useCacheEvents,
         useCacheSend
     } = drizzleReactHooks.useDrizzle()
-
+    const accounts = drizzleReactHooks.useDrizzleState((state: any) => state.accounts)
+    const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
+    const season = useCacheCall('piggyGame', 'currentSeason')
+    const gameOpen = useCacheCall('piggyGame', 'isGameOpen')
+    const convertedBalance = baseUnitsToPiggy(balance.toString())
     enum AttackState {
         Closed = 1,
         Confirm,
@@ -70,22 +75,24 @@ export function War() {
         <div>
             <Segment>
                 <Header size="huge" textAlign="center">War Room</Header>
-                <Header size="medium" className="header-margin-1" textAlign="center">War is currently <WarText /></Header>
+                <Header size="medium" className="header-margin-1" textAlign="center">Season {season} is currently {gameOpen ? "OPEN" : "CLOSED"}</Header>
             </Segment>
             <Grid columns={1} container={true}>
                 <Grid.Column textAlign="center">
                     <Segment>
-                        <Header size="small" className="header-margin-1">
-                            Balance:
-                    </Header>
-                        <BalanceDisplay drizzle={drizzle} drizzleState={drizzleState}/>
-                        <Input placeholder='Attack Size' onChange={(e => setSize(parseInt(e.target.value)))} />
+                        <Header size="medium" className="header-margin-1">
+                            Balance: {convertedBalance} War Pigs
+                        </Header>
+                        <Header size="small" className="header-margin-2">
+                            Deposit $PIGGY to get War Pigs, or buy War Pigs directly for BNB:
+                        </Header>
+                        <DepositModal /> <BuyModal />
                     </Segment>
 
                     <Segment>
                         <Grid columns={nteams} container={true}>
                             {teams.map((tnumber) =>
-                                <Grid.Column>
+                                <Grid.Column key={tnumber}>
                                     <RenderTeam team={tnumber} />
                                     <Button fluid negative onClick={() => startAttack(tnumber)}>Attack!</Button>
                                 </Grid.Column>
