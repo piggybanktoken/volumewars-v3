@@ -14,7 +14,6 @@ import { join } from '../app/piggyGame'
 export function War() {
     // const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
     const {
-        useCacheSend,
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const accounts = drizzleReactHooks.useDrizzleState((state: any) => state.accounts)
