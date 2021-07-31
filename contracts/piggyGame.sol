@@ -172,6 +172,15 @@ contract piggyGame is Ownable {
     function getThresholds() public view returns(uint256, uint256, uint256, uint256) {
         return (thresholds.grade1, thresholds.grade2, thresholds.grade3, thresholds.grade4);
     }
+    function getRareChances() public view returns(uint8, uint8, uint8) {
+        return (rareChance.grade2, rareChance.grade3, rareChance.grade4);
+    }
+    function teamDamageOf(uint32 teamId) public view returns(uint256) {
+        return teams[teamId].damagePoints;
+    }
+    function getActiveTeams() public view returns(uint32[] memory) {
+        return activeTeams;
+    }
     function playerWins(address _player) public view returns(uint32){
         uint32 team = players[_player].team;
         uint32 winsBeforeJoin = players[_player].winsBeforeJoin;
