@@ -5,7 +5,7 @@ import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { DepositModal } from './depositModal'
 import { BuyModal } from './buyModal'
 import { AttackModal } from './attackModal'
-
+import { WithdrawModal } from "./withdrawModal"
 import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { openAttackModal, closeAttackModal } from '../features/UISlice'
@@ -47,7 +47,7 @@ export function War() {
                         <Header size="medium" className="header-margin-1">
                             Balance: {convertedBalance} War Pigs
                         </Header>
-                        <DepositModal />
+                        <WithdrawModal />
                         <Header size="small" className="header-margin-2">
                             Deposit $PIGGY to get War Pigs, or buy War Pigs directly for BNB:
                         </Header>

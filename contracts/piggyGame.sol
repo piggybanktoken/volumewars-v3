@@ -304,8 +304,7 @@ contract piggyGame is Ownable {
         uint256 previousBalance = piggyToken.balanceOf(address(this));
         piggyToken.transfer(msg.sender, amount);
         balances[msg.sender] = balances[msg.sender] - amount;
-        uint256 currentBalance = piggyToken.balanceOf(address(this));
-        require((previousBalance - currentBalance) == amount, "Contract balance decrease greater than amount");
+        require((previousBalance - piggyToken.balanceOf(address(this))) <= amount, "Contract balance decrease greater than amount");
         emit Withdrawal(msg.sender, amount);
     }
 
