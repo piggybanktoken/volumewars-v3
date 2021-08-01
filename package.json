@@ -21,10 +21,14 @@
   },
   "homepage": "https://github.com/truffle-box/drizzle-box#readme",
   "dependencies": {
+    "@chainlink/contracts": "^0.2.1",
     "@openzeppelin/contracts": "^4.2.0",
     "@types/react-router-dom": "^5.1.8",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "react-router-dom": "^5.2.0"
+  },
+  "devDependencies": {
+    "truffle-plugin-verify": "^0.5.11"
   }
 }

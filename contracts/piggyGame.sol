@@ -8,6 +8,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
 import "./IBEP20.sol";
 
@@ -19,7 +20,7 @@ interface IRewardNFT is IERC721 {
     function addSet(uint16 set, uint8 number) external;
 }
 
-contract piggyGame is Ownable {
+contract piggyGame is Ownable, VRFConsumerBase  {
     using Address for address;
 
     // Reward NFT address
@@ -110,12 +111,23 @@ contract piggyGame is Ownable {
 
     uint256 public joinFee = 10000000000000000; // 0.01 BNB
 
-    constructor(IBEP20 _piggyToken, address _router) {
-       piggyToken = _piggyToken;
-       piggyAddress = address(piggyToken);
-       pancakeSwapRouter = IUniswapV2Router02(_router);
-       pancakeSwapPair = IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(address(piggyToken), pancakeSwapRouter.WETH());
-       require(pancakeSwapPair != address(0), "TEST::updatepancakeSwapRouter: Invalid pair address.");
+    // Chainlink
+    bytes32 internal keyHash;
+    uint256 internal fee;
+
+    constructor(IBEP20 _piggyToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
+        VRFConsumerBase(
+            _coordinator,
+            _linkToken
+        )
+     {
+        keyHash = _hash;
+        fee = _fee;
+        piggyToken = _piggyToken;
+        piggyAddress = address(piggyToken);
+        pancakeSwapRouter = IUniswapV2Router02(_router);
+        pancakeSwapPair = IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(address(piggyToken), pancakeSwapRouter.WETH());
+        require(pancakeSwapPair != address(0), "TEST::updatepancakeSwapRouter: Invalid pair address.");
     }
 
     event pancakeSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
@@ -240,9 +252,9 @@ contract piggyGame is Ownable {
         _to.transfer(address(this).balance);
         emit OwnerWithdrawal(msg.sender, _to, address(this).balance);
     }
-    function setJoinFee(uint256 fee) public onlyOwner {
-        joinFee = fee;
-        emit SetJoinFee(msg.sender, fee);
+    function setJoinFee(uint256 _fee) public onlyOwner {
+        joinFee = _fee;
+        emit SetJoinFee(msg.sender, _fee);
     }
     /**
      * @dev Update the swap router.
@@ -270,7 +282,6 @@ contract piggyGame is Ownable {
             requests[requestId].requester = msg.sender;
             requests[requestId].rtype = 2;
             requests[requestId].fulfilled = false;
-            players[msg.sender].team = 1;
         }
         emit JoinedGame(msg.sender, season);
     }
@@ -357,9 +368,9 @@ contract piggyGame is Ownable {
     }
 
     function getRandomNumber() private returns (bytes32 requestId) {
-        latestRID += 1;
         emit RandomNumberRequest(msg.sender, bytes32(abi.encodePacked(latestRID)));
-        return bytes32(abi.encodePacked(latestRID));
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
+        return requestRandomness(keyHash, fee);
     }
 
     function requestReward(uint256 amount) private {
@@ -382,7 +393,7 @@ contract piggyGame is Ownable {
         }
     }
 
-    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal { // override
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         if (requests[requestId].fulfilled) {
             return;
         }
