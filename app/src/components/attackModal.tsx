@@ -1,4 +1,4 @@
-import {useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Button, Modal, List, Header, Label } from 'semantic-ui-react'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
@@ -18,7 +18,7 @@ export function AttackModal() {
     const rareChances = useCacheCall('piggyGame', 'getRareChances')
     const thresholds = useCacheCall('piggyGame', 'getThresholds')
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
-    const convertedBalance = baseUnitsToPiggy(balance.toString())
+    const convertedBalance = useMemo(() => baseUnitsToPiggy(balance), [balance])
 
 
 
