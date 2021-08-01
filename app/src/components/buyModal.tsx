@@ -29,16 +29,16 @@ export function BuyModal() {
             <Modal.Description>
             <List>
                 <List.Item>
+                    <Button onClick={()=> buyWarPigs(0.01)}>0.01 BNB</Button>
+                </List.Item>
+                <List.Item>
+                    <Button onClick={()=> buyWarPigs(0.05)}>0.05 BNB</Button>
+                </List.Item>
+                <List.Item>
                     <Button onClick={()=> buyWarPigs(0.1)}>0.1 BNB</Button>
                 </List.Item>
                 <List.Item>
-                    <Button onClick={()=> buyWarPigs(0.5)}>0.5 BNB</Button>
-                </List.Item>
-                <List.Item>
-                    <Button onClick={()=> buyWarPigs(1)}>1 BNB</Button>
-                </List.Item>
-                <List.Item>
-                    <Button onClick={()=> buyWarPigs(2)}>2 BNB</Button>
+                    <Button onClick={()=> buyWarPigs(0.2)}>0.2 BNB</Button>
                 </List.Item>
             </List>
             <p>

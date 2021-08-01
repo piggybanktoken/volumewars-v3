@@ -50,12 +50,12 @@ export function War() {
                         <Header size="small" className="header-margin-2">
                             Deposit $PIGGY to get War Pigs, or buy War Pigs directly for BNB:
                         </Header>
-                        <DepositModal /> <BuyModal />
+                        {/* <DepositModal /> */} <BuyModal /> 
                     </Segment>
                     {gameOpen && (!hasJoined) &&
                     <Segment>
                         <Header size="medium" className="header-margin-1">
-                            Join The Game for 0.1 BNB
+                            Join The Game for 0.01 BNB
                         </Header>
                         <Button onClick={() => joinGame()}>Join</Button>
                     </Segment>}
