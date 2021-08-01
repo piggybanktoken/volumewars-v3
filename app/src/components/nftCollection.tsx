@@ -59,11 +59,6 @@ function sortNFT(data: NFTData): OrderedNFTs {
 // }
 
 export function NFTCollection() {
-    /*
-     * TODO:
-     * - Display differently (don't filter, show all and scroll)
-     */
-    const [filter, setFilter] = useState(NFTType.Common)
 
     const {
         useCacheSend,
@@ -74,7 +69,7 @@ export function NFTCollection() {
     const {send, TX} = useCacheSend('piggyNFT', 'mint')
     const boosterPackBalance = useCacheCall('piggyGame', 'boosterPackBalanceOf', accounts[0])
     const unpackBoosterPack = useCacheSend('piggyGame', 'unpackBoosterPack')
-    
+
     const [nextN, setN] = useState(1)
     function mintNFT(){
         send(accounts[0], 1, nextN, {"gas": 999999})
@@ -177,16 +172,18 @@ export function NFTCollection() {
                             {sorted && range(1, 7, 1).map((n) => {
                                 const normalList = sorted[setId].normal[n]
                                 if (normalList) {
-                                    return <NFTDisplay nft={normalList[0]} nfts={normalList}/>
+                                    return <NFTDisplay key={n} nft={normalList[0]} nfts={normalList}/>
                                 } else {
-                                    return <NFTDisplay nft={{id: 0, set: setId, num: n, rarity: Rarity.Common}} nfts={[]}/>
+                                    return <NFTDisplay key={n} nft={{id: 0, set: setId, num: n, rarity: Rarity.Common}} nfts={[]}/>
                                 }
                             })}
                             {sorted && 
-                                <NFTDisplay nft={sorted[setId].legendary[0] || {id: 0, set: setId, num: 0, rarity: Rarity.Legendary}} nfts={sorted[setId].legendary} />
+                                <NFTDisplay key={0} nft={sorted[setId].legendary[0] || {id: 0, set: setId, num: 0, rarity: Rarity.Legendary}} nfts={sorted[setId].legendary} />
                             }
                         </Card.Group>
-                        <Button disabled={ingredients == false} onClick={() => ingredients == false || forgeLegendary(ingredients)}>{ingredients == false ? "Cannot Forge Legendary" : "Forge Legendary"}</Button>
+                    </Segment>
+                    <Segment>
+                    <Button disabled={ingredients == false} onClick={() => ingredients == false || forgeLegendary(ingredients)}>{ingredients == false ? "Cannot Forge Legendary" : "Forge Legendary"}</Button>
                     </Segment>
                 </>)
          }
@@ -198,14 +195,9 @@ export function NFTCollection() {
             <Segment><Button onClick={() => unPack()}>Open Booster Pack</Button>
                 Booster Packs Owned: {boosterPackBalance}
             </Segment>
-            <Segment>
-                
-                <Card.Group itemsPerRow={8}>
-                    {Object.keys(sorted).map((setId)=> 
-                        <SetDisplay setId={parseInt(setId)}/>
-                    )}
-                </Card.Group>
-            </Segment>
+            {Object.keys(sorted).map((setId)=> 
+                        <SetDisplay key={setId} setId={parseInt(setId)}/>
+            )}
         </div>
     )
 }
