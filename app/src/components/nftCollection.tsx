@@ -165,7 +165,8 @@ export function NFTCollection() {
         function forgeLegendary(cards: NFT[]) {
             console.log(cards.map(nft => nft.id))
             console.log(cards.map(nft => nft.num))
-            forge.send(cards.map(nft => nft.id.toString()))
+            const arg = cards.map(nft => nft.id.toString())
+            forge.send(arg)
             console.log(forge)
         }
         const ingredients = useMemo(() => legendaryIngredients(), [sorted])
