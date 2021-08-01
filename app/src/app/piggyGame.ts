@@ -1,8 +1,6 @@
-import { ChainId, Fetcher, Token, WETH, Route, Trade, TradeType, TokenAmount, Percent } from '@pancakeswap/sdk'
 import { ethers, utils } from "ethers"
 import { Web3Provider, JsonRpcProvider } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
-import { BigNumber } from '@ethersproject/bignumber'
 
 import * as abi from '../contracts/piggyGame.json'
 import * as nftABI from '../contracts/piggyNFT.json'

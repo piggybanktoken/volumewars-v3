@@ -1,8 +1,7 @@
-import { ChainId, Fetcher, Token, WETH, Route, Trade, TradeType, TokenAmount, Percent } from '@pancakeswap/sdk'
-import { ethers, utils } from "ethers"
+import { ChainId, Token } from '@pancakeswap/sdk'
+import { ethers } from "ethers"
 import { Web3Provider, JsonRpcProvider } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
-import { BigNumber } from '@ethersproject/bignumber'
 
 export const tokenAddress = '0xcd2ecd5e06b1a330789b30e8ada3d11c51503a71'
 const decimals = 9

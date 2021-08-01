@@ -1,10 +1,9 @@
-import React, { useContext } from 'react'
 import { ViewDataComponent } from "./components/viewDataComponent"
 import { Dashboard } from "./components/Dashboard"
 import { NFTCollection } from "./components/nftCollection"
 import { War } from "./components/war"
 import { TopBar } from "./components/topBar"
-import { Button, Image, Search, Grid, Container, Dropdown, Segment, Divider, Icon, Label, Sidebar, Menu, Header } from 'semantic-ui-react'
+import { Sidebar, Menu } from 'semantic-ui-react'
 import {
   BrowserRouter as Router,
   Switch,

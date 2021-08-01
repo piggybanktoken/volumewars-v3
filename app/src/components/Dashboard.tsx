@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react"
+import { useState } from "react"
 import { Grid, Header } from 'semantic-ui-react'
 import { BalanceDisplay, DepositButton } from './balance'
-import TeamDisplay from './teamDisplay'
-import { Drizzle } from "@drizzle/store";
+
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 /*
