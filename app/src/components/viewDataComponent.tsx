@@ -27,7 +27,7 @@ export function ViewDataComponent() {
     await approve(gameAddress, balance)
   }
   async function getPiggyBalance(): Promise<string> {
-    const balance = await balanceOf(drizzleState["accounts"][0])
+    const balance = "0" //await balanceOf(drizzleState["accounts"][0])
     setPiggyBalance(balance)
     return balance
   }

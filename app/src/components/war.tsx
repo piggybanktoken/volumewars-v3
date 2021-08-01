@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Grid, Button, Label, Header, Container, Input, Segment, Modal, Image } from 'semantic-ui-react'
 import TeamDisplay from './teamDisplay'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
@@ -23,7 +23,7 @@ export function War() {
     const gameOpen = useCacheCall('piggyGame', 'isGameOpen')
     const teamArray = useCacheCall('piggyGame', 'getActiveTeams')
     const ownTeam = useCacheCall('piggyGame', 'teamOf', accounts[0])
-    const convertedBalance = baseUnitsToPiggy(balance.toString())
+    const convertedBalance = useMemo(() => balance ? baseUnitsToPiggy(balance.toString()) : "0", [balance])
     // const {joinSend, TXJoin} = useCacheSend('piggyGame', 'join')
     const dispatch = useAppDispatch()
 
