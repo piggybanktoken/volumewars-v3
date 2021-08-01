@@ -86,12 +86,11 @@ contract piggyGame is Ownable {
     }
 
     Thresholds public thresholds = Thresholds({
-        grade1: 10   * 10**9 * 10**9,
-        grade2: 50   * 10**9 * 10**9,
-        grade3: 150  * 10**9 * 10**9,
-        grade4: 500  * 10**9 * 10**9
+        grade1: 10   * 10**8 * 10**9,
+        grade2: 1   * 10**9 * 10**9,
+        grade3: 3  * 10**9 * 10**9,
+        grade4: 5  * 10**9 * 10**9
     });
-
     struct RareChance {
         uint8 grade2;
         uint8 grade3;
@@ -109,7 +108,7 @@ contract piggyGame is Ownable {
 
     uint16 public season = 0;
 
-    uint256 public joinFee = 100000000000000000; // 0.1 ETH
+    uint256 public joinFee = 10000000000000000; // 0.01 BNB
 
     constructor(IBEP20 _piggyToken, address _router) {
        piggyToken = _piggyToken;
