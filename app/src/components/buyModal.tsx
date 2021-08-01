@@ -2,13 +2,19 @@ import {useEffect, useState } from 'react'
 import { Button, Modal, List } from 'semantic-ui-react'
 import  { buyTokens } from '../app/piggyGame'
 import { tokenQuote } from '../app/swap'
+import { drizzleReactHooks } from '@drizzle/react-plugin'
 
 export function BuyModal() {
     const [open, setOpen] = useState(false)
-    
+    const {
+        useCacheSend,
+        useCacheCall,
+    } = drizzleReactHooks.useDrizzle()
+    const {send, TX} = useCacheSend('piggyGame', 'buyTokens')
     async function buyWarPigs(BNBAmount: number) {
-        const [_BNBValue, minTokens] = await tokenQuote(BNBAmount)
-        await buyTokens(BNBAmount.toString(), minTokens)
+        const [BNBValue, minTokens] = await tokenQuote(BNBAmount)
+        send(minTokens, {"value": BNBValue})
+        // await buyTokens(BNBAmount.toString(), minTokens)
     }
     
     return (
