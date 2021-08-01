@@ -57,7 +57,8 @@ contract piggyNFT is
         return (metadata[id].set, metadata[id].number);
     }
     function dataOfTokenOfOwnerByIndex(address owner, uint256 id) public view returns (uint256, uint16, uint8) {
-        return (tokenOfOwnerByIndex(owner, id), metadata[id].set, metadata[id].number);
+        uint256 tokenId = tokenOfOwnerByIndex(owner, id);
+        return (tokenId, metadata[tokenId].set, metadata[tokenId].number);
     }
     function totalCardsOf(uint16 id) public view returns (uint8) {
         return sets[id].totalCards;
