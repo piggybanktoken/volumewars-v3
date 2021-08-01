@@ -162,6 +162,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function totalBalance() public view returns (uint256) {
         return piggyToken.balanceOf(address(this));
     }
+    function getJoinFee() public view returns (uint256) {
+        return joinFee;
+    }
     function isGameOpen() public view returns (bool) {
         return open;
     }
