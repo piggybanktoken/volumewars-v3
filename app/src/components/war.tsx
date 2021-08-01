@@ -9,11 +9,11 @@ import { WithdrawModal } from "./withdrawModal"
 import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { openAttackModal, closeAttackModal } from '../features/UISlice'
-import { join } from '../app/piggyGame'
 
 export function War() {
     // const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
     const {
+        useCacheSend,
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const accounts = drizzleReactHooks.useDrizzleState((state: any) => state.accounts)
@@ -24,12 +24,12 @@ export function War() {
     const teamArray = useCacheCall('piggyGame', 'getActiveTeams')
     const ownTeam = useCacheCall('piggyGame', 'teamOf', accounts[0])
     const convertedBalance = useMemo(() => balance ? baseUnitsToPiggy(balance.toString()) : "0", [balance])
-    // const {joinSend, TXJoin} = useCacheSend('piggyGame', 'join')
+    const joinSend = useCacheSend('piggyGame', 'join')
     const dispatch = useAppDispatch()
 
     const nteams = 5
     async function joinGame() {
-        await join()
+        joinSend.send({value: "10000000000000000"})
     }
     useEffect(() => {
         console.log(ownTeam)
