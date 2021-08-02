@@ -425,70 +425,62 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(numPacks > 0, "No booster packs to unpack");
         uint256 seed = players[msg.sender].boosterPacks[numPacks-1].seed;
         uint8 grade = players[msg.sender].boosterPacks[numPacks-1].grade;
-        rewardPlayer(seed, grade);
+        (uint8 numCommon, bool getRare) = getNumRewards(seed, grade, rareChance.grade2-1, rareChance.grade3-1, rareChance.grade4-1);
+        assignNFTs(numCommon, getRare, seed);
         players[msg.sender].boosterPacks.pop();
         emit BoosterPackOpened(msg.sender, grade, seed);
     }
-
-    function rewardPlayer(uint256 seed, uint8 grade) private {
+    function getNumRewards(uint256 seed, uint8 grade, uint8 grade2RareChance, uint8 grade3RareChance, uint8 grade4RareChance) public pure returns(uint8, bool) { // Common, Rare
         require(grade > 0, "Grade too low");
         require(grade <= 4, "Grade too high");
-        uint8 numCommon = 0;
-        uint8 numRare = 0;
-        uint8 nonce = 1;
         if (grade == 1) { // Grade 1: 1 in 3 chance of Common NFT, No Rare
             // Common, 1 in 3 chance
-            if (getRandomInt(2, seed, nonce) == 0) {
-                numCommon = 1;
+            if (getRandomInt(2, seed, 0) == 0) {
+                return (1, false);
             }
-        } else if (grade == 2) { // Grade 2: 0 to 1 Common NFTs, 1 in rareChance.grade2 Chance of Rare
-            // Common
-            numCommon = getRandomInt(1, seed, nonce);
-            nonce +=1;
+        } else if (grade == 2) { // Grade 2: 0 to 1 Common NFTs, 1 in grade2RareChance Chance of Rare
             // Rare
-            if (getRandomInt(rareChance.grade2-1, seed, nonce) == 0) {
-                numRare = 1;
+            if (getRandomInt(grade2RareChance, seed, 0) == 0) {
+                return (0, true);
             }
-        } else if (grade == 3) { // Grade 2: 0 to 2 Common NFTs, 1 in rareChance.grade3 Chance of Rare
             // Common
-            numCommon = getRandomInt(2, seed, nonce);
-            nonce +=1;
+            return (getRandomInt(1, seed, 1), false);
+        } else if (grade == 3) { // Grade 2: 0 to 2 Common NFTs, 1 in grade3RareChance Chance of Rare
             // Rare
-            if (getRandomInt(rareChance.grade3-1, seed, nonce) == 0) {
-                numRare = 1;
+            if (getRandomInt(grade3RareChance, seed, 0) == 0) {
+                return (0, true);
             }
-        } else if (grade == 4) { // Grade 2: 1 to 3 Common NFTs, 1 in rareChance.grade4 Chance of Rare
             // Common
-            numCommon = getRandomInt(2, seed, nonce) + 1;
-            nonce +=1;
+            return (getRandomInt(2, seed, 1), false);
+
+        } else if (grade == 4) { // Grade 2: 1 to 3 Common NFTs, 1 in grade4RareChance Chance of Rare
             // Rare
-            if (getRandomInt(rareChance.grade4-1, seed, nonce) == 0) {
-                numRare = 1;
+            if (getRandomInt(grade4RareChance, seed, 0) == 0) {
+                return (0, true);
             }
+            // Common
+            return (getRandomInt(2, seed, 1) + 1, false);
         }
-        if (numCommon == 0 && numRare == 0) {
-            return;
-        }
-        assignNFTs(numCommon, numRare, seed);
+        return (0, false);
     }
 
-    function assignNFTs(uint8 numCommon, uint8 numRare, uint256 seed) private {
+    function assignNFTs(uint8 numCommon, bool getRare, uint256 seed) private {
         uint8 nonce = 10;
         require(numCommon <= 3, "Too many common NFTs generated");
-        require(numRare <= 1, "Too many rare NFTs generated");
+        if (getRare) {
+            nonce +=1;
+            // Mint Rare NFT
+            uint8 number = getRandomInt(2, seed, nonce) + 5; // 0-2 + 5 = 5-7
+            rewardNFT.mint(msg.sender, season, number);
+            emit NFTAwarded(msg.sender, season, number, true);
+            return;
+        }
         for (uint8 i = 0 ; i < numCommon; i++) {
             nonce += 1;
             // Mint Common NFT
             uint8 number = getRandomInt(3, seed, nonce) + 1; // 0-3 + 1 = 1-4
             rewardNFT.mint(msg.sender, season, number);
             emit NFTAwarded(msg.sender, season, number, false);
-        }
-        if (numRare == 1) {
-            nonce +=1;
-            // Mint Rare NFT
-            uint8 number = getRandomInt(2, seed, nonce) + 5; // 0-2 + 5 = 5-7
-            rewardNFT.mint(msg.sender, season, number);
-            emit NFTAwarded(msg.sender, season, number, true);
         }
     }
 
