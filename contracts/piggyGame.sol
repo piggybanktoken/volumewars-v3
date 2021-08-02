@@ -360,7 +360,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         requestReward(amount);
         players[msg.sender].gamesPlayed += 1;
         players[msg.sender].experience += amount;
-        teams[players[msg.sender].team].damagePoints += amount;
+        teams[team].damagePoints += amount;
         emit Attack(
         msg.sender, 
         team,
