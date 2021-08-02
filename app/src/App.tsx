@@ -1,5 +1,3 @@
-import { ViewDataComponent } from "./components/viewDataComponent"
-import { Dashboard } from "./components/Dashboard"
 import { NFTCollection } from "./components/nftCollection"
 import { War } from "./components/war"
 import { TopBar } from "./components/topBar"
@@ -39,13 +37,7 @@ function App() {
             fluid
             size="huge"
           >
-              <Menu.Item as={Link} to="/home" onClick={closeMenu}>
-                Home
-              </Menu.Item>
-              <Menu.Item as={Link} to="/drizzle" onClick={closeMenu}>
-                Drizzle
-              </Menu.Item>
-              <Menu.Item as={Link} to="/war" onClick={closeMenu}>
+              <Menu.Item as={Link} to="/" onClick={closeMenu}>
                 War
               </Menu.Item>
               <Menu.Item as={Link} to="/nfts" onClick={closeMenu}>
@@ -55,18 +47,13 @@ function App() {
 
           <Sidebar.Pusher>
             <Switch>
-              <Route path="/drizzle">
-                {initialized && <ViewDataComponent />}
-              </Route>
-              <Route path="/home">
-                {initialized && <Dashboard />}
-              </Route>
-              <Route path="/war">
+            <Route path="/nfts">
+              {initialized && <NFTCollection />}
+            </Route>
+            <Route path="/">
                 {initialized && <War/>}
-              </Route>
-              <Route path="/nfts">
-                {initialized && <NFTCollection />}
-              </Route>
+            </Route>
+             
             </Switch>
           </Sidebar.Pusher>
         </Sidebar.Pushable>
