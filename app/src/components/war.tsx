@@ -37,7 +37,7 @@ export function War() {
     return (
         <div>
             <Segment>
-                <Header size="huge" textAlign="center">War Room {teamArray}</Header>
+                <Header size="huge" textAlign="center">War Room</Header>
                 <Header size="medium" className="header-margin-1" textAlign="center">Season {season} is currently {gameOpen ? <span className='warEnabled'>open</span> : <span className='warDisabled'>closed</span>}</Header>
             </Segment>
             <Grid columns={1} container={true}>
@@ -50,7 +50,7 @@ export function War() {
                         <Header size="small" className="header-margin-2">
                             Deposit $PIGGY to get War Pigs, or buy War Pigs directly for BNB:
                         </Header>
-                        {/* <DepositModal /> */} <BuyModal /> 
+                        <DepositModal /> <BuyModal /> 
                     </Segment>
                     {gameOpen && (!hasJoined) &&
                     <Segment>

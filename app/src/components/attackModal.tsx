@@ -4,7 +4,6 @@ import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { closeAttackModal, selectAttackModalOpen, selectAttackModalTeam } from '../features/UISlice'
 import { baseUnitsToPiggy } from '../app/utils'
-import { attack } from '../app/piggyGame'
 
 export function AttackModal() {
 
@@ -14,21 +13,19 @@ export function AttackModal() {
     const team = useAppSelector(selectAttackModalTeam)
     const {
         useCacheCall,
+        useCacheSend
     } = drizzleReactHooks.useDrizzle()
     const rareChances = useCacheCall('piggyGame', 'getRareChances')
     const thresholds = useCacheCall('piggyGame', 'getThresholds')
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
     const convertedBalance = useMemo(() => baseUnitsToPiggy(balance), [balance])
+    const attackSend = useCacheSend('piggyGame', 'attack')
 
 
 
     async function attackTeam(amount: string) {
-        await attack(amount, team)
+        attackSend.send(amount, team)
     }
-    useEffect(() => {
-        console.log(rareChances)
-        console.log(thresholds)
-    }, [open])
     return (
         <Modal
             onClose={() => dispatch(closeAttackModal({}))}

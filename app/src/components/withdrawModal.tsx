@@ -1,6 +1,5 @@
 import React, {useEffect, useState } from 'react'
 import { Button, Header, Image, Modal, Input } from 'semantic-ui-react'
-import  { withdraw } from '../app/piggyGame'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
 
@@ -10,14 +9,14 @@ export function WithdrawModal() {
     const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
     const {
         useCacheCall,
+        useCacheSend
     } = drizzleReactHooks.useDrizzle()
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
-    
+    const withdrawSend = useCacheSend('piggyGame', 'withdraw')
     async function submitWithdraw() {
         const baseUnits = piggyToBaseUnits(amount)
-        console.log(baseUnits)
-        await withdraw(baseUnits)
-        setOpen(false)
+        withdrawSend.send(baseUnits)
+        setAmount("0")
     }
 
     useEffect(() => {

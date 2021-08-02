@@ -1,7 +1,7 @@
 import React, {useEffect, useState } from 'react'
 import { Button, Header, Image, Modal, Input } from 'semantic-ui-react'
 import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
-import  { deposit, gameAddress } from '../app/piggyGame'
+import  { gameAddress } from '../app/piggyGame'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
 
@@ -10,6 +10,11 @@ export function DepositModal() {
     const [amount, setAmount] = useState("0")
     const [piggyBalance, setPiggyBalance] = useState("0")
     const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
+    const {
+        useCacheSend,
+    } = drizzleReactHooks.useDrizzle()
+    const depositSend = useCacheSend('piggyGame', 'deposit')
+
     async function getPiggyBalance() {
         const balance = await balanceOf(accounts[0])
         const piggyNumber = baseUnitsToPiggy(balance)
@@ -19,8 +24,8 @@ export function DepositModal() {
     async function submitDeposit() {
         const baseUnits = piggyToBaseUnits(amount)
         await approve(gameAddress, baseUnits)
-        await deposit(baseUnits)
-        setOpen(false)
+        depositSend.send(baseUnits)
+        setAmount("0")
     }
 
     useEffect(() => {
