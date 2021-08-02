@@ -2,16 +2,19 @@ import { ChainId, Token } from '@pancakeswap/sdk'
 import { ethers } from "ethers"
 import { Web3Provider, JsonRpcProvider } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
+import Web3 from 'web3'
 
 export const tokenAddress = '0xcd2ecd5e06b1a330789b30e8ada3d11c51503a71'
+const TESTNET_PIGGY = "0xd610e8523b335e6f3cebf1bd564800b755eafdfe"
+
 const decimals = 9
-export const PIGGY = new Token(ChainId.MAINNET, tokenAddress, decimals, "PIGGY")
+export const PIGGY = new Token(ChainId.TESTNET, TESTNET_PIGGY, decimals, "PIGGY")
 
 function getContract(): ethers.Contract {
-    const wprovider = new JsonRpcProvider("http://localhost:8545")
+    const wprovider = new Web3Provider((window as any).ethereum as any,  {name: "binance", chainId: 97 })
     const signer = wprovider.getSigner()
     return new Contract(
-        tokenAddress,
+        TESTNET_PIGGY,
         [
             'function balanceOf(address account) external view returns (uint256)',
             'function transfer(address recipient, uint256 amount) external returns (bool)',
