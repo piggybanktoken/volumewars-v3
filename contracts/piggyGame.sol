@@ -294,10 +294,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         uint256 initialTokenBalance = piggyToken.balanceOf(address(this));
         swapEthForExactTokens(msg.value, minTokens);
         uint256 finalTokenBalance = piggyToken.balanceOf(address(this));
-        uint256 tokensReceived = finalTokenBalance - initialTokenBalance;
-        require(tokensReceived > 0, "No Tokens provided");
-        balances[msg.sender] = balances[msg.sender] + tokensReceived;
-        emit TokensPurchased(msg.sender, tokensReceived, minTokens, msg.value);
+        require(finalTokenBalance > initialTokenBalance, "No Tokens provided");
+        balances[msg.sender] = balances[msg.sender] + finalTokenBalance - initialTokenBalance;
+        emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
     function deposit(uint256 amount) public {
         require(open, "Game is closed");
@@ -307,7 +306,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         // Transfer tokens to the game contract
         piggyToken.transferFrom(msg.sender, address(this), amount);
         uint256 currentBalance = piggyToken.balanceOf(address(this));
-        require(currentBalance - previousBalance > 0, "Negative Balance Increase");
+        require(currentBalance > previousBalance, "Negative Balance Increase");
         balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
         emit Deposit(msg.sender, amount);
     }
@@ -342,17 +341,17 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(tokensSold <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
 
         uint256 ETHReceived = afterETHBalance - initialETHBalance; // ETH Received from token sale
-        require(ETHReceived > 0, "Negative BNB from selling tokens");
+        require(afterETHBalance > initialETHBalance, "Negative BNB from selling tokens");
 
         swapEthForTokens(ETHReceived); // Buy tokens for ETH
 
         require(address(this).balance == initialETHBalance, "BNB Balance of contract changed");
 
         uint256 tokensReceived = piggyToken.balanceOf(address(this)) - afterBalance;
-        require(tokensReceived > 0, "Tokens lost in purchase");
+        require(piggyToken.balanceOf(address(this)) > afterBalance, "Tokens lost in purchase");
         require(tokensReceived < amount, "Tokens increased after charge and attack");
-        require(initialBalance - piggyToken.balanceOf(address(this)) > 0, "Piggy balance did not decrease");
-        require(initialBalance - piggyToken.balanceOf(address(this)) < balances[msg.sender], "Player cannot pay for balance decrease");
+        require(initialBalance > piggyToken.balanceOf(address(this)), "Piggy balance did not decrease");
+        require((initialBalance - piggyToken.balanceOf(address(this))) < balances[msg.sender], "Player cannot pay for balance decrease");
 
         // Change in piggy balance is charged to the player
         balances[msg.sender] -= initialBalance - piggyToken.balanceOf(address(this));
