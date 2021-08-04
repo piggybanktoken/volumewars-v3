@@ -530,6 +530,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     function openPool() private {
         require(rewardPools[season].open == false, "Pool already open");
+        require(address(this).balance >= rewardPools[season].balance, "Insufficient funds to open pool");
+        require(rewardPools[season].balance > 0, "No funds in pool");
         rewardPools[season].open = true;
         // The rare that has been issued in the smallest number
         uint256 rarestRare = createdCards[5];
