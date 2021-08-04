@@ -77,6 +77,16 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     // User Piggy Balance
     mapping(address => uint256) public balances;
+
+    struct RewardPool {
+        uint256 balance; // BNB Balance
+        uint256 remainingClaims; // claims not yet made
+        uint256 rewardPerNFT; // How much each NFT gets
+        bool open; // Whether it can be withdrawn from
+        mapping(uint256 => bool) nftsClaimed; // ID of NFTs that have already claimed this prize
+    }
+    // Reward pools (season -> pools)
+    mapping (uint16 => RewardPool) rewardPools;
     
     // Thresholds for different booster pack grades
     struct Thresholds {
@@ -103,6 +113,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         grade4: 5   // 1 in 5 Chance
     });
 
+    mapping (uint8 => uint256) createdCards; // Counter for each card number created
+
     uint256 latestRID = 0;
     
     bool public open = false;
@@ -110,7 +122,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     uint16 public season = 0;
 
     uint256 public joinFee = 10000000000000000; // 0.01 BNB
-
+    
     // Chainlink
     bytes32 internal keyHash;
     uint256 internal fee;
@@ -152,6 +164,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     event LegendaryForged(address indexed player, uint16 indexed set);
     event ThresholdsSet(address indexed owner, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4);
     event RareChanceSet(address indexed owner, uint256 grade2, uint256 grade3, uint256 grade4);
+    event PoolOpened(uint16 indexed season, uint256 totalClaims, uint256 initialBalance, uint256 rewardPerNFT);
+    event LegendaryRewardClaimed(uint16 indexed rewardSeason, uint16 indexed currentSeason, uint256 indexed NFT, uint16 NFTSet);
+    event PoolClosedAndFundsTransferred(uint16 indexed poolSeason, uint16 indexed currentSeason, uint256 amount);
 
     // To receive BNB from pancakeSwapRouter when swapping
     receive() external payable {}
@@ -237,6 +252,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             teams[activeTeams[i]].damagePoints = 0;
         }
         teams[winningTeam].wins += 1;
+        openPool();
         emit SeasonClose(msg.sender, season, winningTeam);
         emit SetOpen(msg.sender, open);
     }
@@ -280,6 +296,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(msg.value == joinFee, "BNB provided must equal the fee");
         require(players[msg.sender].season != season, "Player has already joined season");
         players[msg.sender].season = season;
+
+        // Add join fee to reward pool for this season
+        rewardPools[season].balance += msg.value;
+
         if (players[msg.sender].team == 0) {
             bytes32 requestId = getRandomNumber();
             requests[requestId].requester = msg.sender;
@@ -288,6 +308,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         }
         emit JoinedGame(msg.sender, season);
     }
+
     function buyTokens(uint256 minTokens) public payable {
         require(open, "Game is closed");
         require(msg.value > 0, "No BNB provided");
@@ -471,6 +492,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             // Mint Rare NFT
             uint8 number = getRandomInt(2, seed, nonce) + 5; // 0-2 + 5 = 5-7
             rewardNFT.mint(msg.sender, season, number);
+            createdCards[number] += 1;
             emit NFTAwarded(msg.sender, season, number, true);
             return;
         }
@@ -479,6 +501,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             // Mint Common NFT
             uint8 number = getRandomInt(3, seed, nonce) + 1; // 0-3 + 1 = 1-4
             rewardNFT.mint(msg.sender, season, number);
+            createdCards[number] += 1;
             emit NFTAwarded(msg.sender, season, number, false);
         }
     }
@@ -501,7 +524,57 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             rewardNFT.forgeBurn(ids[i]); // Burn NFT
         }
         rewardNFT.mint(msg.sender, cardSet, 0); // Card 0 of set is Legendary
+        createdCards[0] += 1;
         emit LegendaryForged(msg.sender, cardSet);
+    }
+
+    function openPool() private {
+        require(rewardPools[season].open == false, "Pool already open");
+        rewardPools[season].open = true;
+        // The rare that has been issued in the smallest number
+        uint256 rarestRare = createdCards[5];
+        if (createdCards[6] < rarestRare) {
+            rarestRare = createdCards[6];
+        }
+        if (createdCards[7] < rarestRare) {
+            rarestRare = createdCards[7];
+        }
+        if (rarestRare == 0) { // No rares have been issued
+            rarestRare = 1;
+        }
+        // the number of rarest rare issued is the max number of legendaries possible
+        rewardPools[season].remainingClaims = rarestRare;
+        // Get BNB per claim
+        rewardPools[season].rewardPerNFT = rewardPools[season].balance / rewardPools[season].remainingClaims;
+        emit PoolOpened(season, rewardPools[season].remainingClaims, rewardPools[season].balance, rewardPools[season].rewardPerNFT);
+    }
+
+    function claimLegendaryReward(uint256 nftId, uint16 rewardSeason) public {
+        require(rewardPools[rewardSeason].open == true, "Reward claims are not yet open for this season");
+        require(rewardNFT.ownerOf(nftId) == msg.sender, "Sender does not own the NFT");
+        (uint16 cardSet, uint8 num) = rewardNFT.metadataOf(nftId);
+        require(num == 0, "NFT is not of Legendary Quality");
+        require(cardSet <= rewardSeason, "NFT Season must be earlier than or equal to reward season");
+        require(rewardPools[rewardSeason].nftsClaimed[nftId] == false, "NFT Has been claimed for the reward season");
+        rewardPools[rewardSeason].nftsClaimed[nftId] = true; // Reward claimed for this NFT
+
+        require(rewardPools[rewardSeason].remainingClaims >= 1, "No claims remain to be made");
+        require(rewardPools[rewardSeason].rewardPerNFT >= rewardPools[rewardSeason].balance, "Pool insolvent");
+        rewardPools[rewardSeason].remainingClaims -= 1;
+        rewardPools[rewardSeason].balance -= rewardPools[rewardSeason].rewardPerNFT;
+        payable(msg.sender).transfer(rewardPools[rewardSeason].rewardPerNFT);
+        emit LegendaryRewardClaimed(rewardSeason, season, nftId, cardSet);
+    }
+
+    function transferPoolFunds(uint16 from) public onlyOwner {
+        require(rewardPools[from].open == true, "Pool to transfer from is closed");
+        require(open == true, "Season must be opened");
+        require(season > from, "Pool cannot be current season");
+        require(rewardPools[from].balance > 0, "Pool balance is zero");
+        rewardPools[from].open = false;
+        emit PoolClosedAndFundsTransferred(from, season, rewardPools[from].balance);
+        rewardPools[season].balance += rewardPools[from].balance;
+        rewardPools[from].balance = 0;
     }
     
     function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
@@ -581,5 +654,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
     function mintNFT(address to, uint16 set, uint8 number) public onlyOwner {
         rewardNFT.mint(to, set, number);
+        createdCards[number] += 1;
     }
 }
