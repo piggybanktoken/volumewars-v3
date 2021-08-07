@@ -28,10 +28,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     
     // The swap router, modifiable.
     IUniswapV2Router02 public pancakeSwapRouter;
-    
-    //piggy token interface
-    // IBEP20 private piggyToken;
-    // address public piggyAddress;
 
     // Chainlink randomness requests
     struct ChainlinkRequest {
