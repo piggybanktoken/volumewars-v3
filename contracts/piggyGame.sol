@@ -123,7 +123,12 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     // Dev rewards
     uint256 devPool;
 
-    constructor(address _piggyToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
+    address piggyAddress;
+    uint256 minPiggy = 10 * 10**8 * 10**9; // Min piggy to hold in order to join
+
+    address linkAddress;
+
+    constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
         VRFConsumerBase(
             _coordinator,
             _linkToken
@@ -132,6 +137,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         keyHash = _hash;
         fee = _fee;
         pancakeSwapRouter = IUniswapV2Router02(_router);
+        piggyAddress = _piggyToken;
+        linkAddress = _linkToken;
 
         Thresholds memory thresholdSet = Thresholds({
             grade1: 10   * 10**8 * 10**9,
@@ -140,12 +147,21 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             grade4: 5  * 10**9 * 10**9
         });
         addTeam(_piggyToken, thresholdSet.grade1, thresholdSet.grade2, thresholdSet.grade3, thresholdSet.grade4);
+
+        Thresholds memory thresholdSet2 = Thresholds({
+            grade1: 0.01 * 10**9,
+            grade2: 0.02 * 10**9,
+            grade3: 0.10 * 10**9,
+            grade4: 0.20 * 10**9
+        });
+        addTeam(_secondToken, thresholdSet2.grade1, thresholdSet2.grade2, thresholdSet2.grade3, thresholdSet2.grade4);
     }
 
     event PancakeSwapRouterUpdated(address indexed operator, address indexed router);
     event SetOpen(address indexed owner, bool indexed open);
     event SetSeason(address indexed owner, uint32 indexed season);
     event SetJoinFee(address indexed owner, uint256 fee);
+    event SetMinPiggy(address indexed owner, uint256 amount);
     event SeasonClose(address indexed owner, uint32 indexed season, address indexed winner);
     event SeasonOpen(address indexed owner, uint32 indexed season);
     event TeamAdded(address indexed owner, address indexed team);
@@ -293,10 +309,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(teamTokenAddress, pancakeSwapRouter.WETH()) != address(0), "Add Team: Invalid pair address.");
         emit TeamAdded(msg.sender, teamTokenAddress);
     }
-    function withdrawETH(uint256 amount, address payable _to) public onlyOwner {
-        _to.transfer(amount);
-        emit OwnerWithdrawal(msg.sender, _to, amount);
-    }
+
     function withdrawAllDevETH(address payable _to) public onlyOwner {
         require(devPool > 0, "No funds in dev pool");
         uint256 withdrawAmount = devPool;
@@ -304,9 +317,16 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         _to.transfer(withdrawAmount);
         emit OwnerWithdrawal(msg.sender, _to, devPool);
     }
+    function withdrawLink(address payable _to, uint256 amount) public onlyOwner {
+        IBEP20(linkAddress).transfer(_to, amount);
+    }
     function setJoinFee(uint256 _fee) public onlyOwner {
         joinFee = _fee;
         emit SetJoinFee(msg.sender, _fee);
+    }
+    function setJoinPiggy(uint256 _amount) public onlyOwner {
+        minPiggy = _amount;
+        emit SetMinPiggy(msg.sender, _amount);
     }
     /**
      * @dev Update the swap router.
@@ -324,6 +344,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(open, "Game is closed");
         require(msg.value == joinFee, "BNB provided must equal the fee");
         require(players[msg.sender].season != season, "Player has already joined season");
+        require(IBEP20(piggyAddress).balanceOf(msg.sender) >= minPiggy, "Not enough piggy in account");
         players[msg.sender].season = season;
 
         // Add join fee to reward pool for this season
