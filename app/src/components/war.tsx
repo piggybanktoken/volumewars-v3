@@ -6,7 +6,7 @@ import { DepositModal } from './depositModal'
 import { BuyModal } from './buyModal'
 import { AttackModal } from './attackModal'
 import { WithdrawModal } from "./withdrawModal"
-import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils'
+import { baseUnitsToTokens } from '../app/utils'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { openAttackModal, closeAttackModal } from '../features/UISlice'
 
@@ -23,13 +23,14 @@ export function War() {
     const gameOpen = useCacheCall('piggyGame', 'isGameOpen')
     const teamArray = useCacheCall('piggyGame', 'getActiveTeams')
     const ownTeam = useCacheCall('piggyGame', 'teamOf', accounts[0])
-    const convertedBalance = useMemo(() => balance ? baseUnitsToPiggy(balance.toString()) : "0", [balance])
+    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
+    const convertedBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
     const joinSend = useCacheSend('piggyGame', 'join')
     const dispatch = useAppDispatch()
 
     const nteams = 5
-    async function joinGame() {
-        joinSend.send({value: "10000000000000000"})
+    async function joinGame(team: string) {
+        joinSend.send(team, {value: "10000000000000000"})
     }
     useEffect(() => {
         console.log(ownTeam)
@@ -48,16 +49,16 @@ export function War() {
                         </Header>
                         <WithdrawModal />
                         <Header size="small" className="header-margin-2">
-                            Deposit $PIGGY to get War Pigs, or buy War Pigs directly for BNB:
+                            Deposit tokens to get War Pigs, or buy War Pigs directly for BNB:
                         </Header>
                         <DepositModal /> <BuyModal /> 
                     </Segment>
-                    {gameOpen && (!hasJoined) &&
+                    {gameOpen && (!hasJoined) && ownTeam != "0" &&
                     <Segment>
                         <Header size="medium" className="header-margin-1">
                             Join The Game for 0.01 BNB
                         </Header>
-                        <Button onClick={() => joinGame()}>Join</Button>
+                        <Button onClick={() => joinGame(ownTeam)}>Join</Button>
                     </Segment>}
                     <Segment>
                         <Grid columns={nteams} container={true}>
@@ -66,7 +67,12 @@ export function War() {
                                     <div>
                                         <TeamDisplay team={tnumber} ownTeam={ownTeam == tnumber}/>
                                     </div>
+                                    {ownTeam != "0" &&
                                     <Button disabled={ownTeam == tnumber} fluid negative onClick={() => dispatch(openAttackModal(tnumber))}>Attack!</Button>
+                                    }
+                                    {ownTeam == "0" &&
+                                    <Button fluid negative onClick={() => joinGame(tnumber)}>Join</Button>
+                                    }
                                 </Grid.Column>
                             )}
                         </Grid>

@@ -1,7 +1,7 @@
-import React, {useEffect, useState } from 'react'
-import { Button, Header, Image, Modal, Input } from 'semantic-ui-react'
+import {useEffect, useState, useMemo } from 'react'
+import { Button, Header, Modal, Input } from 'semantic-ui-react'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
-import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
+import { tokenToBaseUnits, baseUnitsToTokens } from '../app/utils';
 
 export function WithdrawModal() {
     const [open, setOpen] = useState(false)
@@ -13,11 +13,17 @@ export function WithdrawModal() {
     } = drizzleReactHooks.useDrizzle()
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
     const withdrawSend = useCacheSend('piggyGame', 'withdraw')
+
+    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
+    const symbol = useCacheCall('piggyGame', 'tokenSymbol', accounts[0])
+    const name = useCacheCall('piggyGame', 'tokenName', accounts[0])
+
     async function submitWithdraw() {
-        const baseUnits = piggyToBaseUnits(amount)
+        const baseUnits = tokenToBaseUnits(amount, decimals)
         withdrawSend.send(baseUnits)
         setAmount("0")
     }
+    const tokenBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
 
     useEffect(() => {
         setAmount("0")
@@ -30,10 +36,10 @@ export function WithdrawModal() {
             open={open}
             trigger={<Button secondary>Withdraw War Pigs</Button>}
         >
-        <Modal.Header>Withdraw War Pigs</Modal.Header>
+        <Modal.Header>Withdraw {name}</Modal.Header>
         <Modal.Content image>
             <Modal.Description>
-            <Header>Your War Pigs Balance: {baseUnitsToPiggy(balance)}</Header>
+            <Header>Your War Pigs Balance: {tokenBalance}</Header>
             <Header>Withdraw Amount</Header>
             <Input 
             action={{
@@ -41,11 +47,11 @@ export function WithdrawModal() {
                 labelPosition: 'right',
                 icon: 'star',
                 content: 'All',
-                onClick: () => setAmount(baseUnitsToPiggy(balance))
+                onClick: () => setAmount(tokenBalance)
               }}
             value={amount} onChange={(e, d) => setAmount(d.value)} type="number" />
             <p>
-                You will receive one $PIGGY per War Pig.
+                You will receive one ${symbol} per War Pig.
                 Transaction fees apply.
             </p>
             </Modal.Description>

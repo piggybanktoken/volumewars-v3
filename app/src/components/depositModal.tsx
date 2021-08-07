@@ -1,35 +1,34 @@
-import React, {useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Button, Header, Image, Modal, Input } from 'semantic-ui-react'
-import { balanceOf, approve, tokenAddress, transfer } from "../app/piggy";
+import { approve } from "../app/piggy";
 import  { gameAddress } from '../app/piggyGame'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
-import { piggyToBaseUnits, baseUnitsToPiggy } from '../app/utils';
+import { baseUnitsToTokens, tokenToBaseUnits } from '../app/utils';
 
 export function DepositModal() {
     const [open, setOpen] = useState(false)
     const [amount, setAmount] = useState("0")
-    const [piggyBalance, setPiggyBalance] = useState("0")
     const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
     const {
         useCacheSend,
+        useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const depositSend = useCacheSend('piggyGame', 'deposit')
-
-    async function getPiggyBalance() {
-        const balance = await balanceOf(accounts[0])
-        const piggyNumber = baseUnitsToPiggy(balance)
-        setPiggyBalance(piggyNumber)
-    }
+    const userTokenBalance = useCacheCall('piggyGame', 'userTokenBalance', accounts[0])
+    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
+    const symbol = useCacheCall('piggyGame', 'tokenSymbol', accounts[0])
+    const name = useCacheCall('piggyGame', 'tokenName', accounts[0])
+    const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
+    const tokenBalance = useMemo(() => baseUnitsToTokens(userTokenBalance, decimals), [userTokenBalance, decimals])
     
     async function submitDeposit() {
-        const baseUnits = piggyToBaseUnits(amount)
-        await approve(gameAddress, baseUnits)
+        const baseUnits = tokenToBaseUnits(amount, decimals)
+        await approve(gameAddress, baseUnits, teamAddress)
         depositSend.send(baseUnits)
         setAmount("0")
     }
 
     useEffect(() => {
-        getPiggyBalance()
         setAmount("0")
     }, [open])
 
@@ -38,12 +37,12 @@ export function DepositModal() {
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
             open={open}
-            trigger={<Button secondary>Deposit $PIGGY</Button>}
+            trigger={<Button secondary>Deposit {name}</Button>}
         >
         <Modal.Header>Deposit</Modal.Header>
         <Modal.Content image>
             <Modal.Description>
-            <Header>Your $PIGGY Balance: {piggyBalance}</Header>
+            <Header>Your ${symbol} Balance: {tokenBalance}</Header>
             <Header>Deposit Amount</Header>
             <Input 
             action={{
@@ -51,11 +50,11 @@ export function DepositModal() {
                 labelPosition: 'right',
                 icon: 'star',
                 content: 'Max',
-                onClick: () => setAmount(piggyBalance)
+                onClick: () => setAmount(tokenBalance)
               }}
             value={amount} onChange={(e, d) => setAmount(d.value)} type="number" />
             <p>
-                You will receive one War Pig per $PIGGY.
+                You will receive one War Pig per ${symbol}.
                 Transaction fees apply.
             </p>
             </Modal.Description>
