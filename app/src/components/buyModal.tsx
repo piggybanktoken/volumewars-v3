@@ -1,6 +1,5 @@
-import {useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button, Modal, List } from 'semantic-ui-react'
-import  { buyTokens } from '../app/piggyGame'
 import { tokenQuote } from '../app/swap'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 
@@ -10,11 +9,15 @@ export function BuyModal() {
         useCacheSend,
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
+    const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
+    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
+    const symbol = useCacheCall('piggyGame', 'tokenSymbol', accounts[0])
+    const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
+
     const {send, TX} = useCacheSend('piggyGame', 'buyTokens')
     async function buyWarPigs(BNBAmount: number) {
-        const [BNBValue, minTokens] = await tokenQuote(BNBAmount)
+        const [BNBValue, minTokens] = await tokenQuote(BNBAmount, teamAddress, decimals, symbol)
         send(minTokens, {"value": BNBValue})
-        // await buyTokens(BNBAmount.toString(), minTokens)
     }
     
     return (
@@ -42,9 +45,9 @@ export function BuyModal() {
                 </List.Item>
             </List>
             <p>
-                VolumeWars will buy $PIGGY with BNB from PancakeSwap and <br></br>
+                VolumeWars will buy ${symbol} with BNB from PancakeSwap and <br></br>
                 credit them to your VolumeWars account as War Pigs.<br></br>
-                This lets you avoid paying the $PIGGY transaction fee twice.
+                This lets you avoid paying the ${symbol} transaction fee twice.
             </p>
             </Modal.Description>
         </Modal.Content>
