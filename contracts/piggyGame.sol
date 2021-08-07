@@ -37,15 +37,15 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     struct ChainlinkRequest {
         address requester;
         bool fulfilled;
-        uint8 rtype;
-        uint8 grade;
+        uint8[] grades;
+        uint256 seed;
     }
 
     mapping(bytes32 => ChainlinkRequest) requests;
 
     struct BoosterPack {
         uint256 seed;
-        uint8 grade;
+        uint8[] grades;
     }
 
     struct Player {
@@ -54,7 +54,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         address team;
         uint32 winsBeforeJoin;
         uint256 experience;
-        BoosterPack[] boosterPacks;
+        bytes32[] boosterPacks;
+        uint256 numBoosterPacks;
+        uint8[] unclaimedPacks;
     }
     // Players
     mapping(address => Player) public players;
@@ -173,9 +175,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     event Attack(address indexed player, address indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 BalanceChange);
     event RandomNumberRequest(address indexed requester, bytes32 id);
     event RandomNumberFulfilled(address indexed requester, uint8 indexed rtype, bytes32 id, uint256 randomness);
-    event ReceivedBoosterBack(address indexed requester, uint8 indexed grade, uint256 randomness);
+    event ReceivedBoosterPack(address indexed requester, uint256 randomness);
     event TeamAssigned(address indexed player, address indexed team);
-    event BoosterPackOpened(address indexed player, uint8 indexed grade, uint256 seed);
+    event BoosterPackOpened(address indexed player, uint256 seed);
     event NFTAwarded(address indexed player, uint16 indexed set, uint8 indexed number, bool rare);
     event LegendaryForged(address indexed player, uint16 indexed set);
     event ThresholdsSet(address indexed owner, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4);
@@ -206,7 +208,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         return balances[_player];
     }
     function boosterPackBalanceOf(address _player) public view returns(uint256){
-        return players[_player].boosterPacks.length;
+        return players[_player].numBoosterPacks;
     }
     function totalGamesPlayedOf(address _player) public view returns(uint256){
         return players[_player].gamesPlayed;
@@ -461,19 +463,14 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         if (amount < thresholds[teamAddress].grade1) {
             return;
         }
-        bytes32 requestId = getRandomNumber();
-        requests[requestId].requester = msg.sender;
-        requests[requestId].rtype = 1;
-        requests[requestId].fulfilled = false;
-
         if (amount < thresholds[teamAddress].grade2) {
-            requests[requestId].grade = 1;
+            players[msg.sender].unclaimedPacks.push(1);
         } else if (amount < thresholds[teamAddress].grade3) {
-            requests[requestId].grade = 2;
+            players[msg.sender].unclaimedPacks.push(2);
         } else if (amount < thresholds[teamAddress].grade4) {
-            requests[requestId].grade = 3;
+            players[msg.sender].unclaimedPacks.push(3);
         } else if (amount > thresholds[teamAddress].grade4) {
-            requests[requestId].grade = 4;
+            players[msg.sender].unclaimedPacks.push(4);
         }
     }
 
@@ -481,65 +478,78 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         if (requests[requestId].fulfilled) {
             return;
         }
-        emit RandomNumberFulfilled(requests[requestId].requester, requests[requestId].rtype, requestId, randomness);
         requests[requestId].fulfilled = true;
-
-        // rtype 1: Booster pack
-        if (requests[requestId].rtype == 1) {
-            players[requests[requestId].requester].boosterPacks.push(BoosterPack({
-                grade: requests[requestId].grade,
-                seed: randomness
-            }));
-            emit ReceivedBoosterBack(requests[requestId].requester, requests[requestId].grade, randomness);
-        }
+        requests[requestId].seed = randomness;
+        players[requests[requestId].requester].boosterPacks.push(requestId);
+        players[requests[requestId].requester].numBoosterPacks += requests[requestId].grades.length;
+        emit ReceivedBoosterPack(requests[requestId].requester, randomness);
     }
-
+    function claimBoosterPacks() public {
+        require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs to claim");
+        bytes32 requestId = getRandomNumber();
+        requests[requestId].requester = msg.sender;
+        requests[requestId].fulfilled = false;
+        requests[requestId].grades = players[msg.sender].unclaimedPacks;
+        // Reset player unclaimed packs
+        players[msg.sender].unclaimedPacks = new uint8[](0);
+    }
     function unpackBoosterPack() public {
         uint numPacks = players[msg.sender].boosterPacks.length;
         require(numPacks > 0, "No booster packs to unpack");
-        uint256 seed = players[msg.sender].boosterPacks[numPacks-1].seed;
-        uint8 grade = players[msg.sender].boosterPacks[numPacks-1].grade;
-        (uint8 numCommon, bool getRare) = getNumRewards(seed, grade, rareChance.grade2-1, rareChance.grade3-1, rareChance.grade4-1);
-        assignNFTs(numCommon, getRare, seed);
+        bytes32 requestId = players[msg.sender].boosterPacks[numPacks-1];
+        uint256 seed = requests[requestId].seed;
+
+        uint256 numGrades = requests[requestId].grades.length;
+        for (uint256 i = 0; i > numGrades; i++) {
+            uint8 grade = requests[requestId].grades[i];
+            (uint8 numCommon, bool getRare) = getNumRewards(seed, uint8(i), grade, rareChance.grade2-1, rareChance.grade3-1, rareChance.grade4-1);
+            assignNFTs(numCommon, getRare, seed, uint8(i));
+        }
         players[msg.sender].boosterPacks.pop();
-        emit BoosterPackOpened(msg.sender, grade, seed);
+        players[msg.sender].numBoosterPacks -= numPacks;
+        delete requests[requestId];
+        emit BoosterPackOpened(msg.sender, seed);
     }
-    function getNumRewards(uint256 seed, uint8 grade, uint8 grade2RareChance, uint8 grade3RareChance, uint8 grade4RareChance) public pure returns(uint8, bool) { // Common, Rare
+
+    function getNumRewards(uint256 seed, uint8 nonce, uint8 grade, uint8 grade2RareChance, uint8 grade3RareChance, uint8 grade4RareChance) public pure returns(uint8, bool) { // Common, Rare
         require(grade > 0, "Grade too low");
         require(grade <= 4, "Grade too high");
         if (grade == 1) { // Grade 1: 1 in 3 chance of Common NFT, No Rare
             // Common, 1 in 3 chance
-            if (getRandomInt(2, seed, 0) == 0) {
+            if (getRandomInt(2, seed, nonce) == 0) {
                 return (1, false);
             }
         } else if (grade == 2) { // Grade 2: 0 to 1 Common NFTs, 1 in grade2RareChance Chance of Rare
             // Rare
-            if (getRandomInt(grade2RareChance, seed, 0) == 0) {
+            if (getRandomInt(grade2RareChance, seed, nonce) == 0) {
                 return (0, true);
             }
+            nonce +=1;
             // Common
-            return (getRandomInt(1, seed, 1), false);
+            return (getRandomInt(1, seed, nonce), false);
         } else if (grade == 3) { // Grade 2: 0 to 2 Common NFTs, 1 in grade3RareChance Chance of Rare
             // Rare
-            if (getRandomInt(grade3RareChance, seed, 0) == 0) {
+            if (getRandomInt(grade3RareChance, seed, nonce) == 0) {
                 return (0, true);
             }
+            nonce +=1;
             // Common
-            return (getRandomInt(2, seed, 1), false);
+            return (getRandomInt(2, seed, nonce), false);
 
         } else if (grade == 4) { // Grade 2: 1 to 3 Common NFTs, 1 in grade4RareChance Chance of Rare
             // Rare
-            if (getRandomInt(grade4RareChance, seed, 0) == 0) {
+            if (getRandomInt(grade4RareChance, seed, nonce) == 0) {
                 return (0, true);
             }
+            nonce +=1;
             // Common
-            return (getRandomInt(2, seed, 1) + 1, false);
+            return (getRandomInt(2, seed, nonce) + 1, false);
         }
         return (0, false);
     }
 
-    function assignNFTs(uint8 numCommon, bool getRare, uint256 seed) private {
-        uint8 nonce = 10;
+    function assignNFTs(uint8 numCommon, bool getRare, uint256 seed, uint8 nonceIncrement) private {
+        uint8 nonce = 64 + nonceIncrement;
         require(numCommon <= 3, "Too many common NFTs generated");
         if (getRare) {
             nonce +=1;
