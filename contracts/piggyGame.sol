@@ -226,30 +226,30 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(teams[team].wins >= winsBeforeJoin, "Wins before join higher than total wins");
         return teams[team].wins - winsBeforeJoin;
     }
-    function tokenDecimals() public view returns (uint8) {
-        address teamAddress = players[msg.sender].team;
+    function tokenDecimals(address player) public view returns (uint8) {
+        address teamAddress = players[player].team;
         return teamTokenDecimalsFor(teamAddress);
     }
     function teamTokenDecimalsFor(address teamAddress) public view returns (uint8) {
         return IBEP20(teamAddress).decimals();
     }
-    function tokenSymbol() public view returns (string memory) {
-        address teamAddress = players[msg.sender].team;
+    function tokenSymbol(address player) public view returns (string memory) {
+        address teamAddress = players[player].team;
         return teamTokenSymbolFor(teamAddress);
     }
     function teamTokenSymbolFor(address teamAddress) public view returns (string memory) {
         return IBEP20(teamAddress).symbol();
     }
-    function tokenName() public view returns (string memory) {
-        address teamAddress = players[msg.sender].team;
+    function tokenName(address player) public view returns (string memory) {
+        address teamAddress = players[player].team;
         return teamTokenSymbolFor(teamAddress);
     }
     function teamTokenNameFor(address teamAddress) public view returns (string memory) {
         return IBEP20(teamAddress).name();
     }
-    function userTokenBalance() public view returns (uint256) {
-        address teamAddress = players[msg.sender].team;
-        return IBEP20(teamAddress).balanceOf(msg.sender);
+    function userTokenBalance(address player) public view returns (uint256) {
+        address teamAddress = players[player].team;
+        return IBEP20(teamAddress).balanceOf(player);
     }
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
@@ -343,6 +343,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function buyTokens(uint256 minTokens) public payable {
         require(open, "Game is closed");
         require(msg.value > 0, "No BNB provided");
+        require(players[msg.sender].team != address(0), "User must be in a team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 initialTokenBalance = teamToken.balanceOf(address(this));
         swapEthForExactTokens(msg.value, minTokens);
@@ -353,6 +354,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
     function deposit(uint256 amount) public {
         require(open, "Game is closed");
+        require(players[msg.sender].team != address(0), "User must be in a team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 tokenbalance = teamToken.balanceOf(msg.sender);
         require(tokenbalance >= amount, "Insufficient funds");
@@ -367,6 +369,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     function withdraw(uint256 amount) public {
         require(balances[msg.sender] >= amount, "Insufficient token balance");
+        require(players[msg.sender].team != address(0), "User must be in a team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 previousBalance = teamToken.balanceOf(address(this));
         teamToken.transfer(msg.sender, amount);
