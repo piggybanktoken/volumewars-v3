@@ -29,12 +29,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     // The swap router, modifiable.
     IUniswapV2Router02 public pancakeSwapRouter;
     
-    // The trading pair
-    address public pancakeSwapPair;
-    
     //piggy token interface
-    IBEP20 private piggyToken;
-    address public piggyAddress;
+    // IBEP20 private piggyToken;
+    // address public piggyAddress;
 
     // Chainlink randomness requests
     struct ChainlinkRequest {
@@ -54,7 +51,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     struct Player {
         uint256 gamesPlayed;
         uint16 season;
-        uint32 team;
+        address team;
         uint32 winsBeforeJoin;
         uint256 experience;
         BoosterPack[] boosterPacks;
@@ -69,11 +66,11 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     // Teams
-    mapping(uint32 => Team) public teams;
+    mapping(address => Team) public teams;
 
     uint32 public latestTeam = 0;
 
-    uint32[] public activeTeams;
+    address[] public activeTeams;
 
     // User Piggy Balance
     mapping(address => uint256) public balances;
@@ -96,12 +93,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         uint256 grade4;
     }
 
-    Thresholds public thresholds = Thresholds({
-        grade1: 10   * 10**8 * 10**9,
-        grade2: 1   * 10**9 * 10**9,
-        grade3: 3  * 10**9 * 10**9,
-        grade4: 5  * 10**9 * 10**9
-    });
+    
+    mapping(address => Thresholds) thresholds;
     struct RareChance {
         uint8 grade2;
         uint8 grade3;
@@ -127,7 +120,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     bytes32 internal keyHash;
     uint256 internal fee;
 
-    constructor(IBEP20 _piggyToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
+    // Dev rewards
+    uint256 devPool;
+
+    constructor(address _piggyToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
         VRFConsumerBase(
             _coordinator,
             _linkToken
@@ -135,30 +131,34 @@ contract piggyGame is Ownable, VRFConsumerBase  {
      {
         keyHash = _hash;
         fee = _fee;
-        piggyToken = _piggyToken;
-        piggyAddress = address(piggyToken);
         pancakeSwapRouter = IUniswapV2Router02(_router);
-        pancakeSwapPair = IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(address(piggyToken), pancakeSwapRouter.WETH());
-        require(pancakeSwapPair != address(0), "TEST::updatepancakeSwapRouter: Invalid pair address.");
+
+        Thresholds memory thresholdSet = Thresholds({
+            grade1: 10   * 10**8 * 10**9,
+            grade2: 2   * 10**9 * 10**9,
+            grade3: 3  * 10**9 * 10**9,
+            grade4: 5  * 10**9 * 10**9
+        });
+        addTeam(_piggyToken, thresholdSet.grade1, thresholdSet.grade2, thresholdSet.grade3, thresholdSet.grade4);
     }
 
-    event pancakeSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
+    event PancakeSwapRouterUpdated(address indexed operator, address indexed router);
     event SetOpen(address indexed owner, bool indexed open);
     event SetSeason(address indexed owner, uint32 indexed season);
     event SetJoinFee(address indexed owner, uint256 fee);
-    event SeasonClose(address indexed owner, uint32 indexed season, uint32 indexed winner);
+    event SeasonClose(address indexed owner, uint32 indexed season, address indexed winner);
     event SeasonOpen(address indexed owner, uint32 indexed season);
-    event TeamAdded(address indexed owner, uint32 indexed team);
+    event TeamAdded(address indexed owner, address indexed team);
     event OwnerWithdrawal(address indexed owner, address indexed to, uint256 amount);
-    event JoinedGame(address indexed player, uint256 indexed season);
+    event JoinedGame(address indexed player, uint256 indexed season, address indexed team);
     event TokensPurchased(address indexed player, uint256 amount, uint256 minAmount, uint256 BNBSent);
     event Deposit(address indexed player, uint256 amount);
     event Withdrawal(address indexed player, uint256 amount);
-    event Attack(address indexed player, uint32 indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 BalanceChange);
+    event Attack(address indexed player, address indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 BalanceChange);
     event RandomNumberRequest(address indexed requester, bytes32 id);
     event RandomNumberFulfilled(address indexed requester, uint8 indexed rtype, bytes32 id, uint256 randomness);
     event ReceivedBoosterBack(address indexed requester, uint8 indexed grade, uint256 randomness);
-    event TeamAssigned(address indexed requester, uint32 indexed team, uint256 randomness);
+    event TeamAssigned(address indexed player, address indexed team);
     event BoosterPackOpened(address indexed player, uint8 indexed grade, uint256 seed);
     event NFTAwarded(address indexed player, uint16 indexed set, uint8 indexed number, bool rare);
     event LegendaryForged(address indexed player, uint16 indexed set);
@@ -171,11 +171,11 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     // To receive BNB from pancakeSwapRouter when swapping
     receive() external payable {}
 
-    /**
-    * @dev Returns the address of the current operator.
-    */
+    function totalBalanceOfToken(address tokenAddress) public view returns (uint256) {
+        return IBEP20(tokenAddress).balanceOf(address(this));
+    }
     function totalBalance() public view returns (uint256) {
-        return piggyToken.balanceOf(address(this));
+        return totalBalanceOfToken(players[msg.sender].team);
     }
     function getJoinFee() public view returns (uint256) {
         return joinFee;
@@ -195,11 +195,15 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function totalGamesPlayedOf(address _player) public view returns(uint256){
         return players[_player].gamesPlayed;
     }
-    function teamOf(address _player) public view returns(uint256){
+    function teamOf(address _player) public view returns(address){
         return players[_player].team;
     }
     function getThresholds() public view returns(uint256, uint256, uint256, uint256) {
-        return (thresholds.grade1, thresholds.grade2, thresholds.grade3, thresholds.grade4);
+        address teamAddress = players[msg.sender].team;
+        return (thresholds[teamAddress].grade1, thresholds[teamAddress].grade2, thresholds[teamAddress].grade3, thresholds[teamAddress].grade4);
+    }
+    function getTeamThresholds(address teamAddress) public view returns(uint256, uint256, uint256, uint256) {
+        return (thresholds[teamAddress].grade1, thresholds[teamAddress].grade2, thresholds[teamAddress].grade3, thresholds[teamAddress].grade4);
     }
     function hasPlayerJoined(address _player) public view returns(bool) {
         return players[_player].season == season;
@@ -207,17 +211,17 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function getRareChances() public view returns(uint8, uint8, uint8) {
         return (rareChance.grade2, rareChance.grade3, rareChance.grade4);
     }
-    function teamDamageOf(uint32 teamId) public view returns(uint256) {
+    function teamDamageOf(address teamId) public view returns(uint256) {
         return teams[teamId].damagePoints;
     }
-    function teamWinsOf(uint32 teamId) public view returns(uint32) {
+    function teamWinsOf(address teamId) public view returns(uint32) {
         return teams[teamId].wins;
     }
-    function getActiveTeams() public view returns(uint32[] memory) {
+    function getActiveTeams() public view returns(address[] memory) {
         return activeTeams;
     }
     function playerWins(address _player) public view returns(uint32){
-        uint32 team = players[_player].team;
+        address team = players[_player].team;
         uint32 winsBeforeJoin = players[_player].winsBeforeJoin;
         require(teams[team].wins >= winsBeforeJoin, "Wins before join higher than total wins");
         return teams[team].wins - winsBeforeJoin;
@@ -242,7 +246,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function closeSeason() public onlyOwner {
         open = false;
         uint256 lowestDamagePoints = teams[activeTeams[0]].damagePoints;
-        uint32 winningTeam = activeTeams[0];
+        address winningTeam = activeTeams[0];
         for (uint32 i = 0; i < activeTeams.length; i++) {
             uint256 teamDamagePoints = teams[activeTeams[i]].damagePoints;
             if (teamDamagePoints < lowestDamagePoints){
@@ -257,19 +261,23 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         emit SetOpen(msg.sender, open);
     }
 
-    function addTeam() public onlyOwner {
-        latestTeam += 1;
-        teams[latestTeam].enabled = true;
-        activeTeams.push(latestTeam);
-        emit TeamAdded(msg.sender, latestTeam);
+    function addTeam(address teamTokenAddress, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
+        teams[teamTokenAddress].enabled = true;
+        activeTeams.push(teamTokenAddress);
+        setThresholds(teamTokenAddress, grade1, grade2, grade3, grade4);
+        require(IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(teamTokenAddress, pancakeSwapRouter.WETH()) != address(0), "Add Team: Invalid pair address.");
+        emit TeamAdded(msg.sender, teamTokenAddress);
     }
     function withdrawETH(uint256 amount, address payable _to) public onlyOwner {
         _to.transfer(amount);
         emit OwnerWithdrawal(msg.sender, _to, amount);
     }
-    function withdrawAllETH(address payable _to) public onlyOwner {
-        _to.transfer(address(this).balance);
-        emit OwnerWithdrawal(msg.sender, _to, address(this).balance);
+    function withdrawAllDevETH(address payable _to) public onlyOwner {
+        require(devPool > 0, "No funds in dev pool");
+        uint256 withdrawAmount = devPool;
+        devPool = 0;
+        _to.transfer(withdrawAmount);
+        emit OwnerWithdrawal(msg.sender, _to, devPool);
     }
     function setJoinFee(uint256 _fee) public onlyOwner {
         joinFee = _fee;
@@ -279,54 +287,54 @@ contract piggyGame is Ownable, VRFConsumerBase  {
      * @dev Update the swap router.
      * Can only be called by the current operator.
      */
-    function updatePancakeSwapRouter(address _router, address _piggyAddress) public onlyOwner {
-        piggyAddress = _piggyAddress;
-        piggyToken = IBEP20(_piggyAddress);
+    function updatePancakeSwapRouter(address _router) public onlyOwner {
         pancakeSwapRouter = IUniswapV2Router02(_router);
-        pancakeSwapPair = IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(_piggyAddress , pancakeSwapRouter.WETH());
-        require(pancakeSwapPair != address(0), "TEST::updatepancakeSwapRouter: Invalid pair address.");
-        emit pancakeSwapRouterUpdated(msg.sender, address(pancakeSwapRouter), pancakeSwapPair);
+        emit PancakeSwapRouterUpdated(msg.sender, address(pancakeSwapRouter));
     }
     function updateNFTAddress(IRewardNFT _rewardNFTAddress) public onlyOwner {
         rewardNFT = _rewardNFTAddress;
     }
 
-    function join() public payable {
+    function join(address teamTokenAddress) public payable {
         require(open, "Game is closed");
         require(msg.value == joinFee, "BNB provided must equal the fee");
         require(players[msg.sender].season != season, "Player has already joined season");
         players[msg.sender].season = season;
 
         // Add join fee to reward pool for this season
-        rewardPools[season].balance += msg.value;
-
-        if (players[msg.sender].team == 0) {
-            bytes32 requestId = getRandomNumber();
-            requests[requestId].requester = msg.sender;
-            requests[requestId].rtype = 2;
-            requests[requestId].fulfilled = false;
+        uint256 userDeposit = msg.value;
+        devPool += userDeposit/2;
+        userDeposit -= userDeposit/2;
+        rewardPools[season].balance += userDeposit;
+        
+        if (players[msg.sender].team == address(0)) {
+            require(teams[teamTokenAddress].enabled == true, "Team not enabled");
+            players[msg.sender].team = teamTokenAddress;
+            emit TeamAssigned(msg.sender, teamTokenAddress);
         }
-        emit JoinedGame(msg.sender, season);
+        emit JoinedGame(msg.sender, season, teamTokenAddress);
     }
 
     function buyTokens(uint256 minTokens) public payable {
         require(open, "Game is closed");
         require(msg.value > 0, "No BNB provided");
-        uint256 initialTokenBalance = piggyToken.balanceOf(address(this));
+        IBEP20 teamToken = IBEP20(players[msg.sender].team);
+        uint256 initialTokenBalance = teamToken.balanceOf(address(this));
         swapEthForExactTokens(msg.value, minTokens);
-        uint256 finalTokenBalance = piggyToken.balanceOf(address(this));
+        uint256 finalTokenBalance = teamToken.balanceOf(address(this));
         require(finalTokenBalance > initialTokenBalance, "No Tokens provided");
         balances[msg.sender] = balances[msg.sender] + finalTokenBalance - initialTokenBalance;
         emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
     function deposit(uint256 amount) public {
         require(open, "Game is closed");
-        uint256 tokenbalance = piggyToken.balanceOf(msg.sender);
+        IBEP20 teamToken = IBEP20(players[msg.sender].team);
+        uint256 tokenbalance = teamToken.balanceOf(msg.sender);
         require(tokenbalance >= amount, "Insufficient funds");
-        uint256 previousBalance = piggyToken.balanceOf(address(this));
+        uint256 previousBalance = teamToken.balanceOf(address(this));
         // Transfer tokens to the game contract
-        piggyToken.transferFrom(msg.sender, address(this), amount);
-        uint256 currentBalance = piggyToken.balanceOf(address(this));
+        teamToken.transferFrom(msg.sender, address(this), amount);
+        uint256 currentBalance = teamToken.balanceOf(address(this));
         require(currentBalance > previousBalance, "Negative Balance Increase");
         balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
         emit Deposit(msg.sender, amount);
@@ -334,28 +342,31 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     function withdraw(uint256 amount) public {
         require(balances[msg.sender] >= amount, "Insufficient token balance");
-        uint256 previousBalance = piggyToken.balanceOf(address(this));
-        piggyToken.transfer(msg.sender, amount);
+        IBEP20 teamToken = IBEP20(players[msg.sender].team);
+        uint256 previousBalance = teamToken.balanceOf(address(this));
+        teamToken.transfer(msg.sender, amount);
         balances[msg.sender] = balances[msg.sender] - amount;
-        require((previousBalance - piggyToken.balanceOf(address(this))) <= amount, "Contract balance decrease greater than amount");
+        require((previousBalance - teamToken.balanceOf(address(this))) <= amount, "Contract balance decrease greater than amount");
         emit Withdrawal(msg.sender, amount);
     }
 
-    function attack(uint256 amount, uint32 team) public {
+    function attack(uint256 amount, address team) public {
         require(open, "Game is closed");
         require(season > 0, "Season not set");
         require(players[msg.sender].season == season, "Player has not entered season");
         require(players[msg.sender].team != team, "Cannot attack own team");
-        require(players[msg.sender].team != 0, "Player is not on any team");
+        require(players[msg.sender].team != address(0), "Player is not on any team");
         require(teams[team].enabled, "Team is not enabled");
         require(balances[msg.sender] >= amount, "Insufficient balance");
+        // The team's corresponding token
+        IBEP20 teamToken = IBEP20(players[msg.sender].team);
 
-        uint256 initialBalance = piggyToken.balanceOf(address(this));
+        uint256 initialBalance = teamToken.balanceOf(address(this));
         uint256 initialETHBalance = address(this).balance;
 
         swapTokensForEth(amount); // Sell tokens for ETH
 
-        uint256 afterBalance = piggyToken.balanceOf(address(this));
+        uint256 afterBalance = teamToken.balanceOf(address(this));
         uint256 afterETHBalance = address(this).balance;
 
         uint256 tokensSold = initialBalance - afterBalance; // Tokens sold in the first swap
@@ -368,26 +379,26 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
         require(address(this).balance == initialETHBalance, "BNB Balance of contract changed");
 
-        uint256 tokensReceived = piggyToken.balanceOf(address(this)) - afterBalance;
-        require(piggyToken.balanceOf(address(this)) > afterBalance, "Tokens lost in purchase");
+        uint256 tokensReceived = teamToken.balanceOf(address(this)) - afterBalance;
+        require(teamToken.balanceOf(address(this)) > afterBalance, "Tokens lost in purchase");
         require(tokensReceived < amount, "Tokens increased after charge and attack");
-        require(initialBalance > piggyToken.balanceOf(address(this)), "Piggy balance did not decrease");
-        require((initialBalance - piggyToken.balanceOf(address(this))) < balances[msg.sender], "Player cannot pay for balance decrease");
+        require(initialBalance > teamToken.balanceOf(address(this)), "Piggy balance did not decrease");
+        require((initialBalance - teamToken.balanceOf(address(this))) < balances[msg.sender], "Player cannot pay for balance decrease");
 
         // Change in piggy balance is charged to the player
-        balances[msg.sender] -= initialBalance - piggyToken.balanceOf(address(this));
+        balances[msg.sender] -= initialBalance - teamToken.balanceOf(address(this));
 
         requestReward(amount);
         players[msg.sender].gamesPlayed += 1;
-        players[msg.sender].experience += amount;
-        teams[team].damagePoints += amount;
+        players[msg.sender].experience += ETHReceived;
+        teams[team].damagePoints += ETHReceived;
         emit Attack(
         msg.sender, 
         team,
         amount, 
         ETHReceived,
         tokensReceived,
-        initialBalance - piggyToken.balanceOf(address(this)));
+        initialBalance - teamToken.balanceOf(address(this)));
     }
 
     function getRandomNumber() private returns (bytes32 requestId) {
@@ -397,7 +408,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function requestReward(uint256 amount) private {
-        if (amount < thresholds.grade1) {
+        address teamAddress = players[msg.sender].team;
+        if (amount < thresholds[teamAddress].grade1) {
             return;
         }
         bytes32 requestId = getRandomNumber();
@@ -405,13 +417,13 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         requests[requestId].rtype = 1;
         requests[requestId].fulfilled = false;
 
-        if (amount < thresholds.grade2) {
+        if (amount < thresholds[teamAddress].grade2) {
             requests[requestId].grade = 1;
-        } else if (amount < thresholds.grade3) {
+        } else if (amount < thresholds[teamAddress].grade3) {
             requests[requestId].grade = 2;
-        } else if (amount < thresholds.grade4) {
+        } else if (amount < thresholds[teamAddress].grade4) {
             requests[requestId].grade = 3;
-        } else if (amount > thresholds.grade4) {
+        } else if (amount > thresholds[teamAddress].grade4) {
             requests[requestId].grade = 4;
         }
     }
@@ -430,13 +442,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
                 seed: randomness
             }));
             emit ReceivedBoosterBack(requests[requestId].requester, requests[requestId].grade, randomness);
-        }
-        // rtype 1: Team Assignment
-        if (requests[requestId].rtype == 2) {
-            uint32 teamIndex = uint32(randomness % activeTeams.length);
-            players[requests[requestId].requester].team = activeTeams[teamIndex];
-            players[requests[requestId].requester].winsBeforeJoin = teams[activeTeams[teamIndex]].wins;
-            emit TeamAssigned(requests[requestId].requester, activeTeams[teamIndex], randomness);
         }
     }
 
@@ -579,8 +584,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         rewardPools[from].balance = 0;
     }
     
-    function setThresholds(uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
-        thresholds = Thresholds({
+    function setThresholds(address teamAddress, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
+        thresholds[teamAddress] = Thresholds({
             grade1: grade1, 
             grade2: grade2,
             grade3: grade3,
@@ -602,10 +607,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function swapTokensForEth(uint256 tokenAmount) private {
         // generate the testSwap pair path of token -> weth
         address[] memory path = new address[](2);
-        path[0] = piggyAddress;
+        path[0] = players[msg.sender].team;
         path[1] = pancakeSwapRouter.WETH();
-
-        piggyToken.approve(address(pancakeSwapRouter), tokenAmount*2);
+        IBEP20 teamToken = IBEP20(players[msg.sender].team);
+        teamToken.approve(address(pancakeSwapRouter), tokenAmount*2);
         
         // make the swap
         pancakeSwapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(
@@ -622,7 +627,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         // generate the testSwap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = pancakeSwapRouter.WETH();
-        path[1] = piggyAddress;
+        path[1] = players[msg.sender].team;
 
         // make the swap
         pancakeSwapRouter.swapExactETHForTokensSupportingFeeOnTransferTokens{value: EthAmount}(
@@ -637,7 +642,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         // generate the testSwap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = pancakeSwapRouter.WETH();
-        path[1] = piggyAddress;
+        path[1] = players[msg.sender].team;
 
         // Make the swap
         pancakeSwapRouter.swapETHForExactTokens{value: EthAmount}(
