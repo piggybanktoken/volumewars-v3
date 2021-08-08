@@ -69,11 +69,15 @@ export function NFTCollection() {
     const {send, TX} = useCacheSend('piggyNFT', 'mint')
     const boosterPackBalance = useCacheCall('piggyGame', 'boosterPackBalanceOf', accounts[0])
     const unpackBoosterPack = useCacheSend('piggyGame', 'unpackBoosterPack')
+    const claimBoosterPacks = useCacheSend('piggyGame', 'claimBoosterPacks')
 
     const [nextN, setN] = useState(1)
     function mintNFT(){
         send(accounts[0], 1, nextN, {"gas": 999999})
         setN(nextN+1)
+    }
+    function claimPacks() {
+        claimBoosterPacks.send({"value": "10000000000000000"})
     }
     function unPack(){
         unpackBoosterPack.send()
@@ -165,6 +169,11 @@ export function NFTCollection() {
             console.log(forge)
         }
         const ingredients = useMemo(() => legendaryIngredients(), [sorted])
+        const season = useCacheCall('piggyGame', 'currentSeason')
+        const claimLegendaryReward = useCacheSend('piggyGame', 'claimLegendaryReward')
+        function claimReward(nftId: number, season: string) {
+            claimLegendaryReward.send(nftId, season)
+        }
         return (<>
                     <Segment>
                         <Header>Season {setId} Set</Header>
@@ -177,13 +186,16 @@ export function NFTCollection() {
                                     return <NFTDisplay key={n} nft={{id: 0, set: setId, num: n, rarity: Rarity.Common}} nfts={[]}/>
                                 }
                             })}
-                            {sorted && 
+                            {sorted &&  
                                 <NFTDisplay key={0} nft={sorted[setId].legendary[0] || {id: 0, set: setId, num: 0, rarity: Rarity.Legendary}} nfts={sorted[setId].legendary} />
                             }
                         </Card.Group>
                     </Segment>
                     <Segment>
                     <Button disabled={ingredients == false} onClick={() => ingredients == false || forgeLegendary(ingredients)}>{ingredients == false ? "Cannot Forge Legendary" : "Forge Legendary"}</Button>
+                    {sorted[setId].legendary.map((nft, i) => {
+                        return <Button key={nft.id} onClick={() => claimReward(nft.id, season)}>Claim Legendary Rewards (NFT: {nft.id})</Button>
+                    })}
                     </Segment>
                 </>)
          }
@@ -191,6 +203,8 @@ export function NFTCollection() {
         <div>
             <Segment><Button onClick={() => mintNFT()}>Mint NFT</Button>
                 NFTs Owned: {balance}
+            </Segment>
+            <Segment><Button onClick={() => claimPacks()}>Claim Booster Packs</Button>
             </Segment>
             <Segment><Button onClick={() => unPack()}>Open Booster Pack</Button>
                 Booster Packs Owned: {boosterPackBalance}
