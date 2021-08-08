@@ -124,7 +124,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     address linkAddress;
 
-    uint256 redeemFee = 10000000000000000;
+    uint256 redeemFee = 2000000000000000;
 
     constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
         VRFConsumerBase(
@@ -492,13 +492,13 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         uint256 seed = requests[requestId].seed;
 
         uint256 numGrades = requests[requestId].grades.length;
-        for (uint256 i = 0; i > numGrades; i++) {
+        for (uint256 i = 0; i < numGrades; i++) {
             uint8 grade = requests[requestId].grades[i];
             (uint8 numCommon, bool getRare) = getNumRewards(seed, uint8(i), grade, rareChance.grade2-1, rareChance.grade3-1, rareChance.grade4-1);
             assignNFTs(numCommon, getRare, seed, uint8(i));
         }
         players[msg.sender].boosterPacks.pop();
-        players[msg.sender].numBoosterPacks -= numPacks;
+        players[msg.sender].numBoosterPacks -= numGrades;
         delete requests[requestId];
         emit BoosterPackOpened(msg.sender, seed);
     }
