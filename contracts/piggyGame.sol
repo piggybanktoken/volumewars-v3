@@ -3,11 +3,10 @@ pragma solidity ^0.8.0;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-// import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
 import "./IBEP20.sol";
+import "./ProxySafeVRFConsumerBase.sol";
+import "./ProxySafeOwnable.sol";
 
 interface IRewardNFT is IERC721 {
     function mint(address to, uint16 set, uint8 number) external;
@@ -17,7 +16,7 @@ interface IRewardNFT is IERC721 {
     function addSet(uint16 set, uint8 number) external;
 }
 
-contract piggyGame is Ownable, VRFConsumerBase  {
+contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
     // using Address for address;
 
     // Reward NFT address
@@ -124,11 +123,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     uint256 redeemFee = 2000000000000000;
 
     constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
-        VRFConsumerBase(
-            _coordinator,
-            _linkToken
-        )
      {
+        _setOwner(_msgSender());
+        vrfCoordinator = _coordinator;
+        LINK = LinkTokenInterface(_linkToken);
 
         keyHash = _hash;
         fee = _fee;
@@ -230,31 +228,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function isNFTRedeemable(uint256 nftId, uint16 poolId) public view returns (bool) {
         return rewardPools[poolId].nftsClaimed[nftId] == false;
     }
-    // function tokenDecimals(address player) public view returns (uint8) {
-    //     address teamAddress = players[player].team;
-    //     return teamTokenDecimalsFor(teamAddress);
-    // }
-    // function teamTokenDecimalsFor(address teamAddress) public view returns (uint8) {
-    //     return IBEP20(teamAddress).decimals();
-    // }
-    // function tokenSymbol(address player) public view returns (string memory) {
-    //     address teamAddress = players[player].team;
-    //     return teamTokenSymbolFor(teamAddress);
-    // }
-    // function teamTokenSymbolFor(address teamAddress) public view returns (string memory) {
-    //     return IBEP20(teamAddress).symbol();
-    // }
-    // function tokenName(address player) public view returns (string memory) {
-    //     address teamAddress = players[player].team;
-    //     return teamTokenSymbolFor(teamAddress);
-    // }
-    // function teamTokenNameFor(address teamAddress) public view returns (string memory) {
-    //     return IBEP20(teamAddress).name();
-    // }
-    // function userTokenBalance(address player) public view returns (uint256) {
-    //     address teamAddress = players[player].team;
-    //     return IBEP20(teamAddress).balanceOf(player);
-    // }
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
         emit SetOpen(msg.sender, open);
