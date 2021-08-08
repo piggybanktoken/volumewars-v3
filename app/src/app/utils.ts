@@ -5,6 +5,9 @@ function isZero(str: string) {
     if (str == "0") return true;
     return false;
 }
+export function teamIsZero(team: string){ 
+    return team == "0x0000000000000000000000000000000000000000"
+}
 export function piggyToBaseUnits(piggyNumber: string): string {
     return new BN(piggyNumber).mul(new BN(10**9)).toString()
 }
@@ -15,11 +18,13 @@ export function baseUnitsToPiggy(piggyNumber: string): string {
 
 export function tokenToBaseUnits(amount: string, decimals: string): string {
     if (isZero(amount) || isZero(decimals)) return "0"
-    return new BN(amount).mul(new BN(decimals)).toString()
+    const factor = new BN(10).pow(new BN(decimals))
+    return new BN(amount).mul(factor).toString()
 }
 export function baseUnitsToTokens(amount: string, decimals: string): string {
     if (isZero(amount) || isZero(decimals)) return "0"
-    return new BN(amount).div(new BN(decimals)).toString()
+    const factor = new BN(10).pow(new BN(decimals))
+    return new BN(amount).div(factor).toString()
 }
 
 export function getUserTokenData(account: string) { 
