@@ -105,8 +105,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     });
 
     mapping (uint8 => uint256) createdCards; // Counter for each card number created
-
-    uint256 latestRID = 0;
     
     bool public open = false;
 
@@ -132,27 +130,16 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             _linkToken
         )
      {
+
         keyHash = _hash;
         fee = _fee;
         pancakeSwapRouter = IUniswapV2Router02(_router);
         piggyAddress = _piggyToken;
         linkAddress = _linkToken;
 
-        Thresholds memory thresholdSet = Thresholds({
-            grade1: 10   * 10**8 * 10**9,
-            grade2: 2   * 10**9 * 10**9,
-            grade3: 3  * 10**9 * 10**9,
-            grade4: 5  * 10**9 * 10**9
-        });
-        addTeam(_piggyToken, thresholdSet.grade1, thresholdSet.grade2, thresholdSet.grade3, thresholdSet.grade4);
+        addTeam(_piggyToken, 10 * 10**8 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
 
-        Thresholds memory thresholdSet2 = Thresholds({
-            grade1: 0.01 * 10**9,
-            grade2: 0.02 * 10**9,
-            grade3: 0.10 * 10**9,
-            grade4: 0.20 * 10**9
-        });
-        addTeam(_secondToken, thresholdSet2.grade1, thresholdSet2.grade2, thresholdSet2.grade3, thresholdSet2.grade4);
+        addTeam(_secondToken, 0.01 * 10**9, 0.02 * 10**9, 0.10 * 10**9, 0.20 * 10**9);
     }
 
     event PancakeSwapRouterUpdated(address indexed operator, address indexed router);
@@ -169,8 +156,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     event Deposit(address indexed player, uint256 amount);
     event Withdrawal(address indexed player, uint256 amount);
     event Attack(address indexed player, address indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 BalanceChange);
-    event RandomNumberRequest(address indexed requester, bytes32 id);
-    event RandomNumberFulfilled(address indexed requester, uint8 indexed rtype, bytes32 id, uint256 randomness);
     event ReceivedBoosterPack(address indexed requester, uint256 randomness);
     event TeamAssigned(address indexed player, address indexed team);
     event BoosterPackOpened(address indexed player, uint256 seed);
@@ -185,12 +170,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     // To receive BNB from pancakeSwapRouter when swapping
     receive() external payable {}
 
-    function totalBalanceOfToken(address tokenAddress) public view returns (uint256) {
-        return IBEP20(tokenAddress).balanceOf(address(this));
-    }
-    function totalBalance() public view returns (uint256) {
-        return totalBalanceOfToken(players[msg.sender].team);
-    }
     function getJoinFee() public view returns (uint256) {
         return joinFee;
     }
@@ -216,9 +195,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         address teamAddress = players[msg.sender].team;
         return (thresholds[teamAddress].grade1, thresholds[teamAddress].grade2, thresholds[teamAddress].grade3, thresholds[teamAddress].grade4);
     }
-    function getTeamThresholds(address teamAddress) public view returns(uint256, uint256, uint256, uint256) {
-        return (thresholds[teamAddress].grade1, thresholds[teamAddress].grade2, thresholds[teamAddress].grade3, thresholds[teamAddress].grade4);
-    }
     function hasPlayerJoined(address _player) public view returns(bool) {
         return players[_player].season == season;
     }
@@ -240,31 +216,35 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(teams[team].wins >= winsBeforeJoin, "Wins before join higher than total wins");
         return teams[team].wins - winsBeforeJoin;
     }
-    function tokenDecimals(address player) public view returns (uint8) {
+    function tokenInfo(address player) public view returns (uint256, uint8, string memory, string memory) {
         address teamAddress = players[player].team;
-        return teamTokenDecimalsFor(teamAddress);
+        return (IBEP20(teamAddress).balanceOf(player), IBEP20(teamAddress).decimals(), IBEP20(teamAddress).symbol(), IBEP20(teamAddress).name());
     }
-    function teamTokenDecimalsFor(address teamAddress) public view returns (uint8) {
-        return IBEP20(teamAddress).decimals();
-    }
-    function tokenSymbol(address player) public view returns (string memory) {
-        address teamAddress = players[player].team;
-        return teamTokenSymbolFor(teamAddress);
-    }
-    function teamTokenSymbolFor(address teamAddress) public view returns (string memory) {
-        return IBEP20(teamAddress).symbol();
-    }
-    function tokenName(address player) public view returns (string memory) {
-        address teamAddress = players[player].team;
-        return teamTokenSymbolFor(teamAddress);
-    }
-    function teamTokenNameFor(address teamAddress) public view returns (string memory) {
-        return IBEP20(teamAddress).name();
-    }
-    function userTokenBalance(address player) public view returns (uint256) {
-        address teamAddress = players[player].team;
-        return IBEP20(teamAddress).balanceOf(player);
-    }
+    // function tokenDecimals(address player) public view returns (uint8) {
+    //     address teamAddress = players[player].team;
+    //     return teamTokenDecimalsFor(teamAddress);
+    // }
+    // function teamTokenDecimalsFor(address teamAddress) public view returns (uint8) {
+    //     return IBEP20(teamAddress).decimals();
+    // }
+    // function tokenSymbol(address player) public view returns (string memory) {
+    //     address teamAddress = players[player].team;
+    //     return teamTokenSymbolFor(teamAddress);
+    // }
+    // function teamTokenSymbolFor(address teamAddress) public view returns (string memory) {
+    //     return IBEP20(teamAddress).symbol();
+    // }
+    // function tokenName(address player) public view returns (string memory) {
+    //     address teamAddress = players[player].team;
+    //     return teamTokenSymbolFor(teamAddress);
+    // }
+    // function teamTokenNameFor(address teamAddress) public view returns (string memory) {
+    //     return IBEP20(teamAddress).name();
+    // }
+    // function userTokenBalance(address player) public view returns (uint256) {
+    //     address teamAddress = players[player].team;
+    //     return IBEP20(teamAddress).balanceOf(player);
+    // }
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
         emit SetOpen(msg.sender, open);
@@ -274,7 +254,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         emit SetSeason(msg.sender, season);
     }
     function openSeason() public onlyOwner {
-        require(open == false, "Season currently open");
+        require(open == false, "Season Open");
         season += 1;
         open = true;
         rewardNFT.addSet(season, 7);
@@ -304,12 +284,12 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         teams[teamTokenAddress].enabled = true;
         activeTeams.push(teamTokenAddress);
         setThresholds(teamTokenAddress, grade1, grade2, grade3, grade4);
-        require(IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(teamTokenAddress, pancakeSwapRouter.WETH()) != address(0), "Add Team: Invalid pair address.");
+        require(IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(teamTokenAddress, pancakeSwapRouter.WETH()) != address(0), "Team: Invalid pair");
         emit TeamAdded(msg.sender, teamTokenAddress);
     }
 
     function withdrawAllDevETH(address payable _to) public onlyOwner {
-        require(devPool > 0, "No funds in dev pool");
+        require(devPool > 0, "No funds");
         uint256 withdrawAmount = devPool;
         devPool = 0;
         _to.transfer(withdrawAmount);
@@ -339,10 +319,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function join(address teamTokenAddress) public payable {
-        require(open, "Game is closed");
-        require(msg.value == joinFee, "BNB provided must equal the fee");
-        require(players[msg.sender].season != season, "Player has already joined season");
-        require(IBEP20(piggyAddress).balanceOf(msg.sender) >= minPiggy, "Not enough piggy in account");
+        require(open, "Game closed");
+        require(msg.value == joinFee, "Value != fee");
+        require(players[msg.sender].season != season, "Already joined");
+        require(IBEP20(piggyAddress).balanceOf(msg.sender) >= minPiggy, "Insuff. piggy");
         players[msg.sender].season = season;
 
         // Add join fee to reward pool for this season
@@ -352,7 +332,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         rewardPools[season].balance += userDeposit;
         
         if (players[msg.sender].team == address(0)) {
-            require(teams[teamTokenAddress].enabled == true, "Team not enabled");
+            require(teams[teamTokenAddress].enabled == true, "Team invalid");
             players[msg.sender].team = teamTokenAddress;
             emit TeamAssigned(msg.sender, teamTokenAddress);
         }
@@ -360,20 +340,20 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function buyTokens(uint256 minTokens) public payable {
-        require(open, "Game is closed");
-        require(msg.value > 0, "No BNB provided");
-        require(players[msg.sender].team != address(0), "User must be in a team");
+        require(open, "Game closed");
+        require(msg.value > 0, "No BNB");
+        require(players[msg.sender].team != address(0), "User not in team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 initialTokenBalance = teamToken.balanceOf(address(this));
         swapEthForExactTokens(msg.value, minTokens);
         uint256 finalTokenBalance = teamToken.balanceOf(address(this));
-        require(finalTokenBalance > initialTokenBalance, "No Tokens provided");
+        require(finalTokenBalance > initialTokenBalance, "No Tokens");
         balances[msg.sender] = balances[msg.sender] + finalTokenBalance - initialTokenBalance;
         emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
     function deposit(uint256 amount) public {
-        require(open, "Game is closed");
-        require(players[msg.sender].team != address(0), "User must be in a team");
+        require(open, "Game closed");
+        require(players[msg.sender].team != address(0), "User not in team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 tokenbalance = teamToken.balanceOf(msg.sender);
         require(tokenbalance >= amount, "Insufficient funds");
@@ -381,30 +361,30 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         // Transfer tokens to the game contract
         teamToken.transferFrom(msg.sender, address(this), amount);
         uint256 currentBalance = teamToken.balanceOf(address(this));
-        require(currentBalance > previousBalance, "Negative Balance Increase");
+        require(currentBalance > previousBalance, "Negative Increase");
         balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
         emit Deposit(msg.sender, amount);
     }
 
     function withdraw(uint256 amount) public {
-        require(balances[msg.sender] >= amount, "Insufficient token balance");
-        require(players[msg.sender].team != address(0), "User must be in a team");
+        require(balances[msg.sender] >= amount, "Insuff. balance");
+        require(players[msg.sender].team != address(0), "Not in team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 previousBalance = teamToken.balanceOf(address(this));
         teamToken.transfer(msg.sender, amount);
         balances[msg.sender] = balances[msg.sender] - amount;
-        require((previousBalance - teamToken.balanceOf(address(this))) <= amount, "Contract balance decrease greater than amount");
+        require((previousBalance - teamToken.balanceOf(address(this))) <= amount, "Balance dec > amount");
         emit Withdrawal(msg.sender, amount);
     }
 
     function attack(uint256 amount, address team) public {
-        require(open, "Game is closed");
-        require(season > 0, "Season not set");
-        require(players[msg.sender].season == season, "Player has not entered season");
-        require(players[msg.sender].team != team, "Cannot attack own team");
-        require(players[msg.sender].team != address(0), "Player is not on any team");
-        require(teams[team].enabled, "Team is not enabled");
-        require(balances[msg.sender] >= amount, "Insufficient balance");
+        require(open, "Game closed");
+        require(season > 0, "Season 0");
+        require(players[msg.sender].season == season, "Player not joined");
+        require(players[msg.sender].team != team, "Friendly Fire");
+        require(players[msg.sender].team != address(0), "Not on a team");
+        require(teams[team].enabled, "Team invalid");
+        require(balances[msg.sender] >= amount, "Insuff. balance");
         // The team's corresponding token
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
 
@@ -417,20 +397,20 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         uint256 afterETHBalance = address(this).balance;
 
         uint256 tokensSold = initialBalance - afterBalance; // Tokens sold in the first swap
-        require(tokensSold <= amount, "Contract balance decrease greater than amount"); // Fails on ==, why?
+        require(tokensSold <= amount, "Contract balance dec > amount"); // Fails on ==, why?
 
         uint256 ETHReceived = afterETHBalance - initialETHBalance; // ETH Received from token sale
-        require(afterETHBalance > initialETHBalance, "Negative BNB from selling tokens");
+        require(afterETHBalance > initialETHBalance, "Neg. BNB from selling tokens");
 
         swapEthForTokens(ETHReceived); // Buy tokens for ETH
 
-        require(address(this).balance == initialETHBalance, "BNB Balance of contract changed");
+        require(address(this).balance == initialETHBalance, "Contract BNB var.");
 
         uint256 tokensReceived = teamToken.balanceOf(address(this)) - afterBalance;
         require(teamToken.balanceOf(address(this)) > afterBalance, "Tokens lost in purchase");
-        require(tokensReceived < amount, "Tokens increased after charge and attack");
-        require(initialBalance > teamToken.balanceOf(address(this)), "Piggy balance did not decrease");
-        require((initialBalance - teamToken.balanceOf(address(this))) < balances[msg.sender], "Player cannot pay for balance decrease");
+        require(tokensReceived < amount, "Tokens inc. after atk");
+        require(initialBalance > teamToken.balanceOf(address(this)), "Token Balance not dec.");
+        require((initialBalance - teamToken.balanceOf(address(this))) < balances[msg.sender], "Balance dec > Pl. Balance");
 
         // Change in piggy balance is charged to the player
         balances[msg.sender] -= initialBalance - teamToken.balanceOf(address(this));
@@ -449,8 +429,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function getRandomNumber() private returns (bytes32 requestId) {
-        emit RandomNumberRequest(msg.sender, bytes32(abi.encodePacked(latestRID)));
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
+        require(LINK.balanceOf(address(this)) >= fee, "Insuff. LINK");
         return requestRandomness(keyHash, fee);
     }
 
@@ -481,7 +460,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         emit ReceivedBoosterPack(requests[requestId].requester, randomness);
     }
     function claimBoosterPacks() public {
-        require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs to claim");
+        require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs");
         bytes32 requestId = getRandomNumber();
         requests[requestId].requester = msg.sender;
         requests[requestId].fulfilled = false;
@@ -491,7 +470,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
     function unpackBoosterPack() public {
         uint numPacks = players[msg.sender].boosterPacks.length;
-        require(numPacks > 0, "No booster packs to unpack");
+        require(numPacks > 0, "No booster packs");
         bytes32 requestId = players[msg.sender].boosterPacks[numPacks-1];
         uint256 seed = requests[requestId].seed;
 
@@ -508,8 +487,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function getNumRewards(uint256 seed, uint8 nonce, uint8 grade, uint8 grade2RareChance, uint8 grade3RareChance, uint8 grade4RareChance) public pure returns(uint8, bool) { // Common, Rare
-        require(grade > 0, "Grade too low");
-        require(grade <= 4, "Grade too high");
+        require(grade > 0, "G. too low");
+        require(grade <= 4, "G. too high");
         if (grade == 1) { // Grade 1: 1 in 3 chance of Common NFT, No Rare
             // Common, 1 in 3 chance
             if (getRandomInt(2, seed, nonce) == 0) {
@@ -546,7 +525,7 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     function assignNFTs(uint8 numCommon, bool getRare, uint256 seed, uint8 nonceIncrement) private {
         uint8 nonce = 64 + nonceIncrement;
-        require(numCommon <= 3, "Too many common NFTs generated");
+        require(numCommon <= 3, "Too many commons");
         if (getRare) {
             nonce +=1;
             // Mint Rare NFT
@@ -572,15 +551,15 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     function forgeLegendary(uint256[] calldata ids) public {
         (uint16 cardSet, uint8 _number) = rewardNFT.metadataOf(ids[0]);
-        require(_number == 1, "First card must be 1");
+        require(_number == 1, "First card != 1");
         uint8 totalCards = rewardNFT.totalCardsOf(cardSet);
-        require(totalCards == ids.length, "Wrong amount of cards to complete the set");
+        require(totalCards == ids.length, "Wrong n of cards");
 
         for (uint8 i = 0 ; i < totalCards; i++) {
-            require(rewardNFT.ownerOf(ids[i]) == msg.sender, "Sender does not own the NFT");
+            require(rewardNFT.ownerOf(ids[i]) == msg.sender, "Not NFT owner");
             (uint16 set, uint8 number) = rewardNFT.metadataOf(ids[i]);
-            require(set == cardSet, "Card from wrong set");
-            require(number == (i+1), "Wrong card number or order"); // Cards are from 1 to totalCards, i is from 0 to totalCards - 1
+            require(set == cardSet, "Wrong set");
+            require(number == (i+1), "Wrong number/order"); // Cards are from 1 to totalCards, i is from 0 to totalCards - 1
             rewardNFT.forgeBurn(ids[i]); // Burn NFT
         }
         rewardNFT.mint(msg.sender, cardSet, 0); // Card 0 of set is Legendary
@@ -589,9 +568,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function openPool() private {
-        require(rewardPools[season].open == false, "Pool already open");
-        require(address(this).balance >= rewardPools[season].balance, "Insufficient funds to open pool");
-        require(rewardPools[season].balance > 0, "No funds in pool");
+        require(rewardPools[season].open == false, "Pool is open");
+        require(address(this).balance >= rewardPools[season].balance, "Insuff. funds to open");
+        require(rewardPools[season].balance > 0, "No balance");
         rewardPools[season].open = true;
         // The rare that has been issued in the smallest number
         uint256 rarestRare = createdCards[5];
@@ -612,16 +591,16 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function claimLegendaryReward(uint256 nftId, uint16 rewardSeason) public {
-        require(rewardPools[rewardSeason].open == true, "Reward claims are not yet open for this season");
-        require(rewardNFT.ownerOf(nftId) == msg.sender, "Sender does not own the NFT");
+        require(rewardPools[rewardSeason].open == true, "Claims not open");
+        require(rewardNFT.ownerOf(nftId) == msg.sender, "Not NFT owner");
         (uint16 cardSet, uint8 num) = rewardNFT.metadataOf(nftId);
-        require(num == 0, "NFT is not of Legendary Quality");
-        require(cardSet <= rewardSeason, "NFT Season must be earlier than or equal to reward season");
-        require(rewardPools[rewardSeason].nftsClaimed[nftId] == false, "NFT Has been claimed for the reward season");
+        require(num == 0, "Not Legendary");
+        require(cardSet <= rewardSeason, "NFT Season not <= reward season");
+        require(rewardPools[rewardSeason].nftsClaimed[nftId] == false, "NFT claimed for season");
         rewardPools[rewardSeason].nftsClaimed[nftId] = true; // Reward claimed for this NFT
 
-        require(rewardPools[rewardSeason].remainingClaims >= 1, "No claims remain to be made");
-        require(rewardPools[rewardSeason].rewardPerNFT >= rewardPools[rewardSeason].balance, "Pool insolvent");
+        require(rewardPools[rewardSeason].remainingClaims >= 1, "No claims left");
+        require(rewardPools[rewardSeason].rewardPerNFT >= rewardPools[rewardSeason].balance, "Insolvent");
         rewardPools[rewardSeason].remainingClaims -= 1;
         rewardPools[rewardSeason].balance -= rewardPools[rewardSeason].rewardPerNFT;
         payable(msg.sender).transfer(rewardPools[rewardSeason].rewardPerNFT);
@@ -629,10 +608,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     }
 
     function transferPoolFunds(uint16 from) public onlyOwner {
-        require(rewardPools[from].open == true, "Pool to transfer from is closed");
-        require(open == true, "Season must be opened");
-        require(season > from, "Pool cannot be current season");
-        require(rewardPools[from].balance > 0, "Pool balance is zero");
+        require(rewardPools[from].open == true, "From is closed");
+        require(open == true, "Season closed");
+        require(season > from, "Pool is current");
+        require(rewardPools[from].balance > 0, "Pool is zero");
         rewardPools[from].open = false;
         emit PoolClosedAndFundsTransferred(from, season, rewardPools[from].balance);
         rewardPools[season].balance += rewardPools[from].balance;
@@ -706,13 +685,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
             address(this),
             block.timestamp
         );
-    }
-
-    function inRange(uint256 lowerLimit, uint256 upperLimit, uint256 value) internal pure returns(bool){
-        if(value >= lowerLimit && value <= upperLimit) {
-            return true;
-        }
-        return false;
     }
     function mintNFT(address to, uint16 set, uint8 number) public onlyOwner {
         rewardNFT.mint(to, set, number);
