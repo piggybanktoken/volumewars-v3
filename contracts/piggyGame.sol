@@ -220,6 +220,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         address teamAddress = players[player].team;
         return (IBEP20(teamAddress).balanceOf(player), IBEP20(teamAddress).decimals(), IBEP20(teamAddress).symbol(), IBEP20(teamAddress).name());
     }
+    function isNFTRedeemable(uint256 nftId, uint16 poolId) public view returns (bool) {
+        return rewardPools[poolId].nftsClaimed[nftId] == false;
+    }
     // function tokenDecimals(address player) public view returns (uint8) {
     //     address teamAddress = players[player].team;
     //     return teamTokenDecimalsFor(teamAddress);
