@@ -118,12 +118,29 @@ contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
     address piggyAddress;
     uint256 minPiggy = 10 * 10**8 * 10**9; // Min piggy to hold in order to join
 
-    address linkAddress;
-
     uint256 redeemFee = 2000000000000000;
+    bool private initialized;
 
-    constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
-     {
+    // constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
+    //  {
+    //     _setOwner(_msgSender());
+    //     vrfCoordinator = _coordinator;
+    //     LINK = LinkTokenInterface(_linkToken);
+
+    //     keyHash = _hash;
+    //     fee = _fee;
+    //     pancakeSwapRouter = IUniswapV2Router02(_router);
+    //     piggyAddress = _piggyToken;
+    //     linkAddress = _linkToken;
+
+    //     addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
+
+    //     addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
+    // }
+
+    function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) public {
+        require(!initialized, "Initialized");
+        initialized = true;
         _setOwner(_msgSender());
         vrfCoordinator = _coordinator;
         LINK = LinkTokenInterface(_linkToken);
@@ -132,22 +149,16 @@ contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
         fee = _fee;
         pancakeSwapRouter = IUniswapV2Router02(_router);
         piggyAddress = _piggyToken;
-        linkAddress = _linkToken;
 
         addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
-
         addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
     }
 
-    event PancakeSwapRouterUpdated(address indexed operator, address indexed router);
     event SetOpen(address indexed owner, bool indexed open);
     event SetSeason(address indexed owner, uint32 indexed season);
-    event SetJoinFee(address indexed owner, uint256 fee);
-    event SetMinPiggy(address indexed owner, uint256 amount);
     event SeasonClose(address indexed owner, uint32 indexed season, address indexed winner);
     event SeasonOpen(address indexed owner, uint32 indexed season);
     event TeamAdded(address indexed owner, address indexed team);
-    event OwnerWithdrawal(address indexed owner, address indexed to, uint256 amount);
     event JoinedGame(address indexed player, uint256 indexed season, address indexed team);
     event TokensPurchased(address indexed player, uint256 amount, uint256 minAmount, uint256 BNBSent);
     event Deposit(address indexed player, uint256 amount);
@@ -275,18 +286,15 @@ contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
         uint256 withdrawAmount = devPool;
         devPool = 0;
         _to.transfer(withdrawAmount);
-        emit OwnerWithdrawal(msg.sender, _to, devPool);
     }
     function withdrawLink(address payable _to, uint256 amount) public onlyOwner {
-        IBEP20(linkAddress).transfer(_to, amount);
+        LINK.transfer(_to, amount);
     }
     function setJoinFee(uint256 _fee) public onlyOwner {
         joinFee = _fee;
-        emit SetJoinFee(msg.sender, _fee);
     }
     function setJoinPiggy(uint256 _amount) public onlyOwner {
         minPiggy = _amount;
-        emit SetMinPiggy(msg.sender, _amount);
     }
     function setRedeemFee(uint256 _fee) public onlyOwner {
         redeemFee = _fee;
@@ -297,7 +305,6 @@ contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
      */
     function updatePancakeSwapRouter(address _router) public onlyOwner {
         pancakeSwapRouter = IUniswapV2Router02(_router);
-        emit PancakeSwapRouterUpdated(msg.sender, address(pancakeSwapRouter));
     }
     function updateNFTAddress(IRewardNFT _rewardNFTAddress) public onlyOwner {
         rewardNFT = _rewardNFTAddress;
