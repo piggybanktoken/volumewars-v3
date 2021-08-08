@@ -13,10 +13,8 @@ export function WithdrawModal() {
     } = drizzleReactHooks.useDrizzle()
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
     const withdrawSend = useCacheSend('piggyGame', 'withdraw')
+    const {0: _tokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
 
-    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
-    const symbol = useCacheCall('piggyGame', 'tokenSymbol', accounts[0])
-    const name = useCacheCall('piggyGame', 'tokenName', accounts[0])
 
     async function submitWithdraw() {
         const baseUnits = tokenToBaseUnits(amount, decimals)

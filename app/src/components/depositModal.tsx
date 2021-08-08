@@ -14,10 +14,7 @@ export function DepositModal() {
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const depositSend = useCacheSend('piggyGame', 'deposit')
-    const userTokenBalance = useCacheCall('piggyGame', 'userTokenBalance', accounts[0])
-    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
-    const symbol = useCacheCall('piggyGame', 'tokenSymbol', accounts[0])
-    const name = useCacheCall('piggyGame', 'tokenName', accounts[0])
+    const {0: userTokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
     const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
     const tokenBalance = useMemo(() => baseUnitsToTokens(userTokenBalance, decimals), [userTokenBalance, decimals])
     

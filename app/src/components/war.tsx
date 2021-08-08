@@ -23,7 +23,7 @@ export function War() {
     const gameOpen = useCacheCall('piggyGame', 'isGameOpen')
     const teamArray = useCacheCall('piggyGame', 'getActiveTeams')
     const ownTeam = useCacheCall('piggyGame', 'teamOf', accounts[0])
-    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
+    const {0: tokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
     const convertedBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
     const joinSend = useCacheSend('piggyGame', 'join')
     const dispatch = useAppDispatch()

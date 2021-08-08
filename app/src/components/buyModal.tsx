@@ -10,8 +10,7 @@ export function BuyModal() {
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
-    const decimals = useCacheCall('piggyGame', 'tokenDecimals', accounts[0])
-    const symbol = useCacheCall('piggyGame', 'tokenSymbol', accounts[0])
+    const {0: tokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
     const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
 
     const {send, TX} = useCacheSend('piggyGame', 'buyTokens')
