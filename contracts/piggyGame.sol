@@ -139,9 +139,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         piggyAddress = _piggyToken;
         linkAddress = _linkToken;
 
-        addTeam(_piggyToken, 10 * 10**8 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
+        addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
 
-        addTeam(_secondToken, 0.01 * 10**9, 0.02 * 10**9, 0.10 * 10**9, 0.20 * 10**9);
+        addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
     }
 
     event PancakeSwapRouterUpdated(address indexed operator, address indexed router);
