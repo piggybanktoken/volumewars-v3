@@ -3,7 +3,7 @@ import { Button, Modal, List, Header, Label } from 'semantic-ui-react'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { closeAttackModal, selectAttackModalOpen, selectAttackModalTeam } from '../features/UISlice'
-import { baseUnitsToPiggy } from '../app/utils'
+import { baseUnitsToPiggy, getTeamTokenData } from '../app/utils'
 
 export function AttackModal() {
 
@@ -20,7 +20,7 @@ export function AttackModal() {
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
     const convertedBalance = useMemo(() => baseUnitsToPiggy(balance), [balance])
     const attackSend = useCacheSend('piggyGame', 'attack')
-
+    const [decimals, symbol, name] = useCacheCall(['piggyGame'], getTeamTokenData(team))
 
 
     async function attackTeam(amount: string) {
@@ -31,7 +31,7 @@ export function AttackModal() {
             onClose={() => dispatch(closeAttackModal({}))}
             open={open}
         >
-        <Modal.Header>Attack Team {team}</Modal.Header>
+        <Modal.Header>Attack {name}</Modal.Header>
         <Modal.Content image>
             <Modal.Description>
             <Header size="medium" className="header-margin-1">

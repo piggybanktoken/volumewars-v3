@@ -6,10 +6,11 @@ import { DepositModal } from './depositModal'
 import { BuyModal } from './buyModal'
 import { AttackModal } from './attackModal'
 import { WithdrawModal } from "./withdrawModal"
-import { baseUnitsToTokens } from '../app/utils'
+import { baseUnitsToTokens, teamIsZero } from '../app/utils'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { openAttackModal, closeAttackModal } from '../features/UISlice'
 import { getUserTokenData } from "../app/utils"
+
 export function War() {
     // const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
     const {
@@ -24,7 +25,7 @@ export function War() {
     const teamArray = useCacheCall('piggyGame', 'getActiveTeams')
     const ownTeam = useCacheCall('piggyGame', 'teamOf', accounts[0])
     const [tokenBalance, decimals, symbol, name] = useCacheCall(['piggyGame'], getUserTokenData(accounts[0]))
-    
+
     const convertedBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
     const joinSend = useCacheSend('piggyGame', 'join')
     const dispatch = useAppDispatch()
@@ -33,6 +34,8 @@ export function War() {
     async function joinGame(team: string) {
         joinSend.send(team, {value: "10000000000000000"})
     }
+
+
     useEffect(() => {
         console.log(ownTeam)
     }, [])
@@ -44,7 +47,7 @@ export function War() {
             </Segment>
             <Grid columns={1} container={true}>
                 <Grid.Column textAlign="center">
-                    <Segment>
+                    {!teamIsZero(ownTeam) &&<Segment>
                         <Header size="medium" className="header-margin-1">
                             Balance: {convertedBalance} War Pigs
                         </Header>
@@ -54,7 +57,8 @@ export function War() {
                         </Header>
                         <DepositModal /> <BuyModal /> 
                     </Segment>
-                    {gameOpen && (!hasJoined) && ownTeam != "0" &&
+                    }
+                    {gameOpen && (!hasJoined) && (!teamIsZero(ownTeam)) &&
                     <Segment>
                         <Header size="medium" className="header-margin-1">
                             Join The Game for 0.01 BNB
@@ -68,10 +72,10 @@ export function War() {
                                     <div>
                                         <TeamDisplay team={tnumber} ownTeam={ownTeam == tnumber}/>
                                     </div>
-                                    {ownTeam != "0" &&
+                                    {!teamIsZero(ownTeam) &&
                                     <Button disabled={ownTeam == tnumber} fluid negative onClick={() => dispatch(openAttackModal(tnumber))}>Attack!</Button>
                                     }
-                                    {ownTeam == "0" &&
+                                    {teamIsZero(ownTeam) &&
                                     <Button fluid negative onClick={() => joinGame(tnumber)}>Join</Button>
                                     }
                                 </Grid.Column>

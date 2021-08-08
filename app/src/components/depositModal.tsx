@@ -16,7 +16,7 @@ export function DepositModal() {
     const depositSend = useCacheSend('piggyGame', 'deposit')
     const [userTokenBalance, decimals, symbol, name] = useCacheCall(['piggyGame'], getUserTokenData(accounts[0]))
     const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
-    
+
     const tokenBalance = useMemo(() => baseUnitsToTokens(userTokenBalance, decimals), [userTokenBalance, decimals])
     
     async function submitDeposit() {
