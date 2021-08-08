@@ -3,10 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./IBEP20.sol";
 import "./ProxySafeVRFConsumerBase.sol";
-import "./ProxySafeOwnable.sol";
+// import "./ProxySafeOwnable.sol";
 
 interface IRewardNFT is IERC721 {
     function mint(address to, uint16 set, uint8 number) external;
@@ -16,7 +17,7 @@ interface IRewardNFT is IERC721 {
     function addSet(uint16 set, uint8 number) external;
 }
 
-contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
+contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     // using Address for address;
 
     // Reward NFT address
@@ -119,7 +120,6 @@ contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
     uint256 minPiggy = 10 * 10**8 * 10**9; // Min piggy to hold in order to join
 
     uint256 redeemFee = 2000000000000000;
-    bool private initialized;
 
     // constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
     //  {
@@ -138,10 +138,7 @@ contract piggyGame is ProxySafeOwnable, ProxySafeVRFConsumerBase  {
     //     addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
     // }
 
-    function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) public {
-        require(!initialized, "Initialized");
-        initialized = true;
-        _setOwner(_msgSender());
+    function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) public initializer {
         vrfCoordinator = _coordinator;
         LINK = LinkTokenInterface(_linkToken);
 
