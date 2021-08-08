@@ -124,6 +124,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
 
     address linkAddress;
 
+    uint256 redeemFee = 10000000000000000;
+
     constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
         VRFConsumerBase(
             _coordinator,
@@ -287,7 +289,6 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         teams[teamTokenAddress].enabled = true;
         activeTeams.push(teamTokenAddress);
         setThresholds(teamTokenAddress, grade1, grade2, grade3, grade4);
-        require(IUniswapV2Factory(pancakeSwapRouter.factory()).getPair(teamTokenAddress, pancakeSwapRouter.WETH()) != address(0), "Team: Invalid pair");
         emit TeamAdded(msg.sender, teamTokenAddress);
     }
 
@@ -308,6 +309,9 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function setJoinPiggy(uint256 _amount) public onlyOwner {
         minPiggy = _amount;
         emit SetMinPiggy(msg.sender, _amount);
+    }
+    function setRedeemFee(uint256 _fee) public onlyOwner {
+        redeemFee = _fee;
     }
     /**
      * @dev Update the swap router.
@@ -462,8 +466,10 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         players[requests[requestId].requester].numBoosterPacks += requests[requestId].grades.length;
         emit ReceivedBoosterPack(requests[requestId].requester, randomness);
     }
-    function claimBoosterPacks() public {
+    function claimBoosterPacks() public payable {
         require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs");
+        require(msg.value == redeemFee, "Fee required");
+        devPool += redeemFee;
         bytes32 requestId = getRandomNumber();
         requests[requestId].requester = msg.sender;
         requests[requestId].fulfilled = false;
