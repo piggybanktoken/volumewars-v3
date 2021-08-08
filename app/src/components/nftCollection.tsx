@@ -68,6 +68,7 @@ export function NFTCollection() {
     const balance = useCacheCall('piggyNFT', 'balanceOf', accounts[0])
     const {send, TX} = useCacheSend('piggyNFT', 'mint')
     const boosterPackBalance = useCacheCall('piggyGame', 'boosterPackBalanceOf', accounts[0])
+    const unclaimedBoosterPackBalance = useCacheCall('piggyGame', 'unclaimedBoosterPacksOf', accounts[0])
     const unpackBoosterPack = useCacheSend('piggyGame', 'unpackBoosterPack')
     const claimBoosterPacks = useCacheSend('piggyGame', 'claimBoosterPacks')
 
@@ -205,6 +206,7 @@ export function NFTCollection() {
                 NFTs Owned: {balance}
             </Segment>
             <Segment><Button onClick={() => claimPacks()}>Claim Booster Packs</Button>
+            Booster Packs Unclaimed: {unclaimedBoosterPackBalance}
             </Segment>
             <Segment><Button onClick={() => unPack()}>Open Booster Pack</Button>
                 Booster Packs Owned: {boosterPackBalance}
