@@ -193,8 +193,8 @@ contract piggyGame is Ownable, VRFConsumerBase  {
     function teamOf(address _player) public view returns(address){
         return players[_player].team;
     }
-    function getThresholds() public view returns(uint256, uint256, uint256, uint256) {
-        address teamAddress = players[msg.sender].team;
+    function getThresholds(address _player) public view returns(uint256, uint256, uint256, uint256) {
+        address teamAddress = players[_player].team;
         return (thresholds[teamAddress].grade1, thresholds[teamAddress].grade2, thresholds[teamAddress].grade3, thresholds[teamAddress].grade4);
     }
     function hasPlayerJoined(address _player) public view returns(bool) {
