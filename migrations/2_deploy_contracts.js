@@ -1,3 +1,5 @@
+const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
+
 const piggyGame = artifacts.require("piggyGame")
 const rewardNFT = artifacts.require("piggyNFT")
 const MAINNET_PIGGY = "0xcd2ecd5e06b1a330789b30e8ada3d11c51503a71"
@@ -23,9 +25,8 @@ const TESTNET_LINK = {
 }
 module.exports = async (deployer, network, [defaultAccount]) => {
   if (!network.startsWith('testnet')) {
-    return deployer.deploy(piggyGame, MAINNET_PIGGY, MAINNET_SAFEMOON, MAINNET_PCS, MAINNET_LINK.coordinator, MAINNET_LINK.token, MAINNET_LINK.hash, MAINNET_LINK.fee).then(() => {
-      return deployer.deploy(rewardNFT, piggyGame.address)
-    })
+    const instance = await deployProxy(piggyGame, [MAINNET_PIGGY, MAINNET_SAFEMOON, MAINNET_PCS, MAINNET_LINK.coordinator, MAINNET_LINK.token, MAINNET_LINK.hash, MAINNET_LINK.fee], { deployer });
+    return deployer.deploy(rewardNFT, instance.address)
   }
   return deployer.deploy(piggyGame, TESTNET_PIGGY, TESTNET_SAFEMOON, TESTNET_PCS, TESTNET_LINK.coordinator, TESTNET_LINK.token, TESTNET_LINK.hash, TESTNET_LINK.fee).then(() => {
     return deployer.deploy(rewardNFT, piggyGame.address)
