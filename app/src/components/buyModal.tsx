@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button, Modal, List } from 'semantic-ui-react'
 import { tokenQuote } from '../app/swap'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
+import { getUserTokenData } from '../app/utils'
 
 export function BuyModal() {
     const [open, setOpen] = useState(false)
@@ -10,7 +11,7 @@ export function BuyModal() {
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const accounts = drizzleReactHooks.useDrizzleState((drizzleState: any) => drizzleState.accounts)
-    const {0: tokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
+    const [tokenBalance, decimals, symbol, name] = useCacheCall(['piggyGame'], getUserTokenData(accounts[0]))
     const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
 
     const {send, TX} = useCacheSend('piggyGame', 'buyTokens')

@@ -3,7 +3,7 @@ import { Button, Header, Image, Modal, Input } from 'semantic-ui-react'
 import { approve } from "../app/piggy";
 import  { gameAddress } from '../app/piggyGame'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
-import { baseUnitsToTokens, tokenToBaseUnits } from '../app/utils';
+import { baseUnitsToTokens, tokenToBaseUnits, getUserTokenData } from '../app/utils';
 
 export function DepositModal() {
     const [open, setOpen] = useState(false)
@@ -14,8 +14,9 @@ export function DepositModal() {
         useCacheCall,
     } = drizzleReactHooks.useDrizzle()
     const depositSend = useCacheSend('piggyGame', 'deposit')
-    const {0: userTokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
+    const [userTokenBalance, decimals, symbol, name] = useCacheCall(['piggyGame'], getUserTokenData(accounts[0]))
     const teamAddress = useCacheCall('piggyGame', 'teamOf', accounts[0])
+    
     const tokenBalance = useMemo(() => baseUnitsToTokens(userTokenBalance, decimals), [userTokenBalance, decimals])
     
     async function submitDeposit() {

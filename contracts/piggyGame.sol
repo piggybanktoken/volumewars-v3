@@ -218,10 +218,15 @@ contract piggyGame is Ownable, VRFConsumerBase  {
         require(teams[team].wins >= winsBeforeJoin, "Wins before join higher than total wins");
         return teams[team].wins - winsBeforeJoin;
     }
-    function tokenInfo(address player) public view returns (uint256, uint8, string memory, string memory) {
-        address teamAddress = players[player].team;
-        return (IBEP20(teamAddress).balanceOf(player), IBEP20(teamAddress).decimals(), IBEP20(teamAddress).symbol(), IBEP20(teamAddress).name());
+    function tokenInfo(address teamAddress) public view returns (uint8, string memory, string memory) {
+        return (IBEP20(teamAddress).decimals(), IBEP20(teamAddress).symbol(), IBEP20(teamAddress).name());
     }
+    
+    function tokenBalanceOf(address player) public view returns (uint256) {
+        address teamAddress = players[player].team;
+        return IBEP20(teamAddress).balanceOf(player);
+    }
+
     function isNFTRedeemable(uint256 nftId, uint16 poolId) public view returns (bool) {
         return rewardPools[poolId].nftsClaimed[nftId] == false;
     }

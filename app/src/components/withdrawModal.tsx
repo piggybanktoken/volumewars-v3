@@ -1,7 +1,7 @@
 import {useEffect, useState, useMemo } from 'react'
 import { Button, Header, Modal, Input } from 'semantic-ui-react'
 import { drizzleReactHooks } from '@drizzle/react-plugin'
-import { tokenToBaseUnits, baseUnitsToTokens } from '../app/utils';
+import { tokenToBaseUnits, baseUnitsToTokens, getUserTokenData } from '../app/utils';
 
 export function WithdrawModal() {
     const [open, setOpen] = useState(false)
@@ -13,15 +13,15 @@ export function WithdrawModal() {
     } = drizzleReactHooks.useDrizzle()
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
     const withdrawSend = useCacheSend('piggyGame', 'withdraw')
-    const {0: _tokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
 
+    const [_tokenBalance, decimals, symbol, name] = useCacheCall(['piggyGame'], getUserTokenData(accounts[0]))
 
     async function submitWithdraw() {
         const baseUnits = tokenToBaseUnits(amount, decimals)
         withdrawSend.send(baseUnits)
         setAmount("0")
     }
-    const tokenBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
+    const warPigsBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
 
     useEffect(() => {
         setAmount("0")
@@ -37,7 +37,7 @@ export function WithdrawModal() {
         <Modal.Header>Withdraw {name}</Modal.Header>
         <Modal.Content image>
             <Modal.Description>
-            <Header>Your War Pigs Balance: {tokenBalance}</Header>
+            <Header>Your War Pigs Balance: {warPigsBalance}</Header>
             <Header>Withdraw Amount</Header>
             <Input 
             action={{
@@ -45,7 +45,7 @@ export function WithdrawModal() {
                 labelPosition: 'right',
                 icon: 'star',
                 content: 'All',
-                onClick: () => setAmount(tokenBalance)
+                onClick: () => setAmount(warPigsBalance)
               }}
             value={amount} onChange={(e, d) => setAmount(d.value)} type="number" />
             <p>

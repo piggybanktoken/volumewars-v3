@@ -9,7 +9,7 @@ import { WithdrawModal } from "./withdrawModal"
 import { baseUnitsToTokens } from '../app/utils'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { openAttackModal, closeAttackModal } from '../features/UISlice'
-
+import { getUserTokenData } from "../app/utils"
 export function War() {
     // const drizzleState = drizzleReactHooks.useDrizzleState((drizzleState: {accounts: any}) => drizzleState)
     const {
@@ -23,7 +23,8 @@ export function War() {
     const gameOpen = useCacheCall('piggyGame', 'isGameOpen')
     const teamArray = useCacheCall('piggyGame', 'getActiveTeams')
     const ownTeam = useCacheCall('piggyGame', 'teamOf', accounts[0])
-    const {0: tokenBalance, 1: decimals, 2: symbol, 3: name} = useCacheCall('piggyGame', 'tokenInfo', accounts[0])
+    const [tokenBalance, decimals, symbol, name] = useCacheCall(['piggyGame'], getUserTokenData(accounts[0]))
+    
     const convertedBalance = useMemo(() => baseUnitsToTokens(balance, decimals), [balance, decimals])
     const joinSend = useCacheSend('piggyGame', 'join')
     const dispatch = useAppDispatch()
