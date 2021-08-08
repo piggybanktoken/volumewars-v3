@@ -16,7 +16,7 @@ export function AttackModal() {
         useCacheSend
     } = drizzleReactHooks.useDrizzle()
     const rareChances = useCacheCall('piggyGame', 'getRareChances')
-    const thresholds = useCacheCall('piggyGame', 'getThresholds')
+    const thresholds = useCacheCall('piggyGame', 'getThresholds', accounts[0])
     const balance = useCacheCall('piggyGame', 'balanceOf', accounts[0])
     const convertedBalance = useMemo(() => baseUnitsToPiggy(balance), [balance])
     const attackSend = useCacheSend('piggyGame', 'attack')
