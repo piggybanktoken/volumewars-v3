@@ -78,7 +78,7 @@ export function NFTCollection() {
         setN(nextN+1)
     }
     function claimPacks() {
-        claimBoosterPacks.send({"value": "10000000000000000"})
+        claimBoosterPacks.send({"value": "2000000000000000"})
     }
     function unPack(){
         unpackBoosterPack.send()
