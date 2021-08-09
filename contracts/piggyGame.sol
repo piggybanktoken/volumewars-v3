@@ -170,7 +170,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     event Attack(address indexed player, address indexed team, uint256 amount, uint256 ethAmount, uint256 tokensReturned, uint256 BalanceChange);
     event ReceivedBoosterPack(address indexed requester, uint256 randomness);
     event TeamAssigned(address indexed player, address indexed team);
-    event BoosterPackOpened(address indexed player, uint256 seed);
+    event BoosterPackOpened(address indexed player, uint8 nonce);
     event NFTAwarded(address indexed player, uint16 indexed set, uint8 indexed number, bool rare);
     event LegendaryForged(address indexed player, uint16 indexed set);
     event ThresholdsSet(address indexed owner, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4);
@@ -472,11 +472,11 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
             uint8 grade = requests[requestId].grades[i];
             (uint8 numCommon, bool getRare) = getNumRewards(seed, uint8(i), grade, rareChance.grade2-1, rareChance.grade3-1, rareChance.grade4-1);
             assignNFTs(numCommon, getRare, seed, uint8(i));
+            emit BoosterPackOpened(msg.sender, uint8(i));
         }
         players[msg.sender].boosterPacks.pop();
         players[msg.sender].numBoosterPacks -= numGrades;
         delete requests[requestId];
-        emit BoosterPackOpened(msg.sender, seed);
     }
 
     function getNumRewards(uint256 seed, uint8 nonce, uint8 grade, uint8 grade2RareChance, uint8 grade3RareChance, uint8 grade4RareChance) public pure returns(uint8, bool) { // Common, Rare
