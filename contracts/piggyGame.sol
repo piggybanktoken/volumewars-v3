@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./IBEP20.sol";
 import "./ProxySafeVRFConsumerBase.sol";
+
 // import "./ProxySafeOwnable.sol";
 
 interface IRewardNFT is IERC721 {
@@ -63,7 +64,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     // Teams
     mapping(address => Team) public teams;
 
-    uint32 public latestTeam = 0;
+    uint32 public latestTeam;
 
     address[] public activeTeams;
 
@@ -95,19 +96,15 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         uint8 grade3;
         uint8 grade4;
     }
-    RareChance public rareChance = RareChance({
-        grade2: 30, // 1 in 30 Chance
-        grade3: 10, // 1 in 10 Chance
-        grade4: 5   // 1 in 5 Chance
-    });
+    RareChance public rareChance;
 
     mapping (uint8 => uint256) createdCards; // Counter for each card number created
     
-    bool public open = false;
+    bool public open;
 
-    uint16 public season = 0;
+    uint16 public season;
 
-    uint256 public joinFee = 10000000000000000; // 0.01 BNB
+    uint256 public joinFee; // 0.01 BNB
     
     // Chainlink
     bytes32 internal keyHash;
@@ -117,9 +114,9 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     uint256 devPool;
 
     address piggyAddress;
-    uint256 minPiggy = 10 * 10**8 * 10**9; // Min piggy to hold in order to join
+    uint256 minPiggy; // Min piggy to hold in order to join
 
-    uint256 redeemFee = 2000000000000000;
+    uint256 redeemFee;
 
     // constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
     //  {
@@ -139,6 +136,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     // }
 
     function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) public initializer {
+
         vrfCoordinator = _coordinator;
         LINK = LinkTokenInterface(_linkToken);
 
@@ -146,6 +144,17 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         fee = _fee;
         pancakeSwapRouter = IUniswapV2Router02(_router);
         piggyAddress = _piggyToken;
+
+
+        rareChance = RareChance({
+            grade2: 30, // 1 in 30 Chance
+            grade3: 10, // 1 in 10 Chance
+            grade4: 5   // 1 in 5 Chance
+        });
+        joinFee = 10000000000000000;
+        minPiggy = 10 * 10**8 * 10**9;
+        redeemFee = 2000000000000000;
+        open = false;
 
         addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
         addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
