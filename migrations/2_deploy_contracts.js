@@ -26,7 +26,7 @@ const TESTNET_LINK = {
 module.exports = async (deployer, network, [defaultAccount]) => {
   if (network.startsWith('develop')) {
     const instance = await deployProxy(piggyGame, [MAINNET_PIGGY, MAINNET_SAFEMOON, MAINNET_PCS, MAINNET_LINK.coordinator, MAINNET_LINK.token, MAINNET_LINK.hash, MAINNET_LINK.fee], { deployer });
-    const deployedGame = await piggyGame.deployed();
+    const deployedGame = await instance.contract.methods;
     await deployedGame.setJoinFee("10000000000000000");
     // "1 000 000 000 000 000 000"
     await deployedGame.setJoinPiggy("1000000000000000000");
@@ -38,7 +38,7 @@ module.exports = async (deployer, network, [defaultAccount]) => {
   }
   if (network.startsWith('testnet')) {
     const instance = await deployProxy(piggyGame, [TESTNET_PIGGY, TESTNET_SAFEMOON, TESTNET_PCS, TESTNET_LINK.coordinator, TESTNET_LINK.token, TESTNET_LINK.hash, TESTNET_LINK.fee], { deployer });
-    const deployedGame = await piggyGame.deployed();
+    const deployedGame = await instance.contract.methods;
     await deployedGame.setJoinFee("10000000000000000");
     // "1 000 000 000 000 000 000"
     await deployedGame.setJoinPiggy("1000000000000000000");
