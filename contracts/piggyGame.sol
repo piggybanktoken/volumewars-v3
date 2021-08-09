@@ -146,22 +146,20 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         piggyAddress = _piggyToken;
 
 
-        rareChance = RareChance({
-            grade2: 30, // 1 in 30 Chance
-            grade3: 10, // 1 in 10 Chance
-            grade4: 5   // 1 in 5 Chance
-        });
-        joinFee = 10000000000000000;
-        minPiggy = 10 * 10**8 * 10**9;
-        redeemFee = 2000000000000000;
-        open = false;
-
+        // rareChance = RareChance({
+        //     grade2: 30, // 1 in 30 Chance
+        //     grade3: 10, // 1 in 10 Chance
+        //     grade4: 5   // 1 in 5 Chance
+        // });
+        // joinFee = 10000000000000000;
+        // minPiggy = 10 * 10**8 * 10**9;
+        // redeemFee = 2000000000000000;
+        // open = false;
+        OwnableUpgradeable.__Ownable_init_unchained();
         addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
         addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
     }
 
-    event SetOpen(address indexed owner, bool indexed open);
-    event SetSeason(address indexed owner, uint32 indexed season);
     event SeasonClose(address indexed owner, uint32 indexed season, address indexed winner);
     event SeasonOpen(address indexed owner, uint32 indexed season);
     event TeamAdded(address indexed owner, address indexed team);
@@ -247,20 +245,16 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     }
     function setOpen(bool isOpen) public onlyOwner {
         open = isOpen;
-        emit SetOpen(msg.sender, open);
     }
     function setSeason(uint16 _season) public onlyOwner {
         season = _season;
-        emit SetSeason(msg.sender, season);
     }
     function openSeason() public onlyOwner {
         require(open == false, "Season Open");
         season += 1;
         open = true;
         rewardNFT.addSet(season, 7);
-        emit SetSeason(msg.sender, season);
         emit SeasonOpen(msg.sender, season);
-        emit SetOpen(msg.sender, open);
     }
     function closeSeason() public onlyOwner {
         open = false;
@@ -277,7 +271,6 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         teams[winningTeam].wins += 1;
         openPool();
         emit SeasonClose(msg.sender, season, winningTeam);
-        emit SetOpen(msg.sender, open);
     }
 
     function addTeam(address teamTokenAddress, uint256 grade1, uint256 grade2, uint256 grade3, uint256 grade4) public onlyOwner {
