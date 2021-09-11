@@ -335,11 +335,17 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         require(msg.value > 0, "No BNB");
         require(players[msg.sender].team != address(0), "User not in team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
+        uint256 initialETHBalance = address(this).balance;
         uint256 initialTokenBalance = teamToken.balanceOf(address(this));
         swapEthForExactTokens(msg.value, minTokens);
         uint256 finalTokenBalance = teamToken.balanceOf(address(this));
         require(finalTokenBalance > initialTokenBalance, "No Tokens");
         balances[msg.sender] = balances[msg.sender] + finalTokenBalance - initialTokenBalance;
+        // Send back leftover
+        uint256 leftoverETH = msg.value - (initialETHBalance - address(this).balance);
+        require(leftoverETH < msg.value);
+        payable(msg.sender).transfer(leftoverETH);
+        require(address(this).balance >= initialETHBalance);
         emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
     function deposit(uint256 amount) external {
