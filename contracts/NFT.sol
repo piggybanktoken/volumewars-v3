@@ -53,17 +53,17 @@ contract piggyNFT is
         grantRole(MINTER_ROLE, game);
     }
 
-    function metadataOf(uint256 id) public view returns (uint16, uint8) {
+    function metadataOf(uint256 id) external view returns (uint16, uint8) {
         return (metadata[id].set, metadata[id].number);
     }
-    function dataOfTokenOfOwnerByIndex(address owner, uint256 id) public view returns (uint256, uint16, uint8) {
+    function dataOfTokenOfOwnerByIndex(address owner, uint256 id) external view returns (uint256, uint16, uint8) {
         uint256 tokenId = tokenOfOwnerByIndex(owner, id);
         return (tokenId, metadata[tokenId].set, metadata[tokenId].number);
     }
-    function totalCardsOf(uint16 id) public view returns (uint8) {
+    function totalCardsOf(uint16 id) external view returns (uint8) {
         return sets[id].totalCards;
     }
-    function addSet(uint16 set, uint8 number) public {
+    function addSet(uint16 set, uint8 number) external {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to add sets");
         sets[set].totalCards = number;
         sets[set].enabled = true;
@@ -73,7 +73,7 @@ contract piggyNFT is
         return _baseTokenURI;
     }
 
-    function forgeBurn(uint256 id) public {
+    function forgeBurn(uint256 id) external {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to mint");
         _burn(id);
     }
@@ -88,7 +88,7 @@ contract piggyNFT is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint16 set, uint8 number) public virtual {
+    function mint(address to, uint16 set, uint8 number) external virtual {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to mint");
         require(sets[set].enabled, "RewardNFT: Set does not exist");
         require(number <= sets[set].totalCards, "RewardNFT: Card does not exist in set");
