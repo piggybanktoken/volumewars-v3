@@ -593,7 +593,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         rewardPools[rewardSeason].nftsClaimed[nftId] = true; // Reward claimed for this NFT
 
         require(rewardPools[rewardSeason].remainingClaims >= 1, "No claims left");
-        require(rewardPools[rewardSeason].rewardPerNFT >= rewardPools[rewardSeason].balance, "Insolvent");
+        require(rewardPools[rewardSeason].rewardPerNFT <= rewardPools[rewardSeason].balance, "Insolvent");
         rewardPools[rewardSeason].remainingClaims -= 1;
         rewardPools[rewardSeason].balance -= rewardPools[rewardSeason].rewardPerNFT;
         payable(msg.sender).transfer(rewardPools[rewardSeason].rewardPerNFT);
