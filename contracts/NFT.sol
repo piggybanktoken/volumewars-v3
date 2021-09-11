@@ -65,6 +65,7 @@ contract piggyNFT is
     }
     function addSet(uint16 set, uint8 number) external {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to add sets");
+        require(sets[set].enabled == false, "Set already exists");
         sets[set].totalCards = number;
         sets[set].enabled = true;
     }
