@@ -94,7 +94,7 @@ contract piggyNFT is
         require(number <= sets[set].totalCards, "RewardNFT: Card does not exist in set");
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        _mint(to, _tokenIdTracker.current());
+        _safeMint(to, _tokenIdTracker.current());
         metadata[_tokenIdTracker.current()].set = set;
         metadata[_tokenIdTracker.current()].number = number;
         _tokenIdTracker.increment();
