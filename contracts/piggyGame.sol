@@ -135,7 +135,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     //     addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
     // }
 
-    function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) public initializer {
+    function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) external initializer {
 
         vrfCoordinator = _coordinator;
         LINK = LinkTokenInterface(_linkToken);
@@ -182,81 +182,81 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     // To receive BNB from pancakeSwapRouter when swapping
     receive() external payable {}
 
-    function getJoinFee() public view returns (uint256) {
+    function getJoinFee() external view returns (uint256) {
         return joinFee;
     }
-    function isGameOpen() public view returns (bool) {
+    function isGameOpen() external view returns (bool) {
         return open;
     }
-    function currentSeason() public view returns (uint16) {
+    function currentSeason() external view returns (uint16) {
         return season;
     }
-    function balanceOf(address _player) public view returns (uint256) {
+    function balanceOf(address _player) external view returns (uint256) {
         return balances[_player];
     }
-    function boosterPackBalanceOf(address _player) public view returns(uint256){
+    function boosterPackBalanceOf(address _player) external view returns(uint256){
         return players[_player].numBoosterPacks;
     }
-    function totalGamesPlayedOf(address _player) public view returns(uint256){
+    function totalGamesPlayedOf(address _player) external view returns(uint256){
         return players[_player].gamesPlayed;
     }
-    function teamOf(address _player) public view returns(address){
+    function teamOf(address _player) external view returns(address){
         return players[_player].team;
     }
-    function getThresholds(address _player) public view returns(uint256, uint256, uint256, uint256) {
+    function getThresholds(address _player) external view returns(uint256, uint256, uint256, uint256) {
         address teamAddress = players[_player].team;
         return (thresholds[teamAddress].grade1, thresholds[teamAddress].grade2, thresholds[teamAddress].grade3, thresholds[teamAddress].grade4);
     }
-    function hasPlayerJoined(address _player) public view returns(bool) {
+    function hasPlayerJoined(address _player) external view returns(bool) {
         return players[_player].season == season;
     }
-    function getRareChances() public view returns(uint8, uint8, uint8) {
+    function getRareChances() external view returns(uint8, uint8, uint8) {
         return (rareChance.grade2, rareChance.grade3, rareChance.grade4);
     }
-    function teamDamageOf(address teamId) public view returns(uint256) {
+    function teamDamageOf(address teamId) external view returns(uint256) {
         return teams[teamId].damagePoints;
     }
-    function teamWinsOf(address teamId) public view returns(uint32) {
+    function teamWinsOf(address teamId) external view returns(uint32) {
         return teams[teamId].wins;
     }
-    function getActiveTeams() public view returns(address[] memory) {
+    function getActiveTeams() external view returns(address[] memory) {
         return activeTeams;
     }
-    function playerWins(address _player) public view returns(uint32){
+    function playerWins(address _player) external view returns(uint32){
         address team = players[_player].team;
         uint32 winsBeforeJoin = players[_player].winsBeforeJoin;
         require(teams[team].wins >= winsBeforeJoin, "Wins before join higher than total wins");
         return teams[team].wins - winsBeforeJoin;
     }
-    function tokenInfo(address teamAddress) public view returns (uint8, string memory, string memory) {
+    function tokenInfo(address teamAddress) external view returns (uint8, string memory, string memory) {
         return (IBEP20(teamAddress).decimals(), IBEP20(teamAddress).symbol(), IBEP20(teamAddress).name());
     }
 
-    function tokenBalanceOf(address player) public view returns (uint256) {
+    function tokenBalanceOf(address player) external view returns (uint256) {
         address teamAddress = players[player].team;
         return IBEP20(teamAddress).balanceOf(player);
     }
-    function unclaimedBoosterPacksOf(address player) public view returns (uint256) {
+    function unclaimedBoosterPacksOf(address player) external view returns (uint256) {
         return players[player].unclaimedPacks.length;
     }
 
-    function isNFTRedeemable(uint256 nftId, uint16 poolId) public view returns (bool) {
+    function isNFTRedeemable(uint256 nftId, uint16 poolId) external view returns (bool) {
         return rewardPools[poolId].nftsClaimed[nftId] == false;
     }
-    function setOpen(bool isOpen) public onlyOwner {
+    function setOpen(bool isOpen) external onlyOwner {
         open = isOpen;
     }
-    function setSeason(uint16 _season) public onlyOwner {
+    function setSeason(uint16 _season) external onlyOwner {
         season = _season;
     }
-    function openSeason() public onlyOwner {
+    function openSeason() external onlyOwner {
         require(open == false, "Season Open");
         season += 1;
         open = true;
         rewardNFT.addSet(season, 7);
         emit SeasonOpen(msg.sender, season);
     }
-    function closeSeason() public onlyOwner {
+    function closeSeason() external onlyOwner {
         open = false;
         uint256 lowestDamagePoints = teams[activeTeams[0]].damagePoints;
         address winningTeam = activeTeams[0];
@@ -280,36 +280,36 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit TeamAdded(msg.sender, teamTokenAddress);
     }
 
-    function withdrawAllDevETH(address payable _to) public onlyOwner {
+    function withdrawAllDevETH(address payable _to) external onlyOwner {
         require(devPool > 0, "No funds");
         uint256 withdrawAmount = devPool;
         devPool = 0;
         _to.transfer(withdrawAmount);
     }
-    function withdrawLink(address payable _to, uint256 amount) public onlyOwner {
+    function withdrawLink(address payable _to, uint256 amount) external onlyOwner {
         LINK.transfer(_to, amount);
     }
-    function setJoinFee(uint256 _fee) public onlyOwner {
+    function setJoinFee(uint256 _fee) external onlyOwner {
         joinFee = _fee;
     }
-    function setJoinPiggy(uint256 _amount) public onlyOwner {
+    function setJoinPiggy(uint256 _amount) external onlyOwner {
         minPiggy = _amount;
     }
-    function setRedeemFee(uint256 _fee) public onlyOwner {
+    function setRedeemFee(uint256 _fee) external onlyOwner {
         redeemFee = _fee;
     }
     /**
      * @dev Update the swap router.
      * Can only be called by the current operator.
      */
-    function updatePancakeSwapRouter(address _router) public onlyOwner {
+    function updatePancakeSwapRouter(address _router) external onlyOwner {
         pancakeSwapRouter = IUniswapV2Router02(_router);
     }
-    function updateNFTAddress(IRewardNFT _rewardNFTAddress) public onlyOwner {
+    function updateNFTAddress(IRewardNFT _rewardNFTAddress) external onlyOwner {
         rewardNFT = _rewardNFTAddress;
     }
 
-    function join(address teamTokenAddress) public payable {
+    function join(address teamTokenAddress) external payable {
         require(open, "Game closed");
         require(msg.value == joinFee, "Value != fee");
         require(players[msg.sender].season != season, "Already joined");
@@ -330,7 +330,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit JoinedGame(msg.sender, season, teamTokenAddress);
     }
 
-    function buyTokens(uint256 minTokens) public payable {
+    function buyTokens(uint256 minTokens) external payable {
         require(open, "Game closed");
         require(msg.value > 0, "No BNB");
         require(players[msg.sender].team != address(0), "User not in team");
@@ -342,7 +342,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         balances[msg.sender] = balances[msg.sender] + finalTokenBalance - initialTokenBalance;
         emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
-    function deposit(uint256 amount) public {
+    function deposit(uint256 amount) external {
         require(open, "Game closed");
         require(players[msg.sender].team != address(0), "User not in team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
@@ -357,7 +357,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit Deposit(msg.sender, amount);
     }
 
-    function withdraw(uint256 amount) public {
+    function withdraw(uint256 amount) external {
         require(balances[msg.sender] >= amount, "Insuff. balance");
         require(players[msg.sender].team != address(0), "Not in team");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
@@ -368,7 +368,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit Withdrawal(msg.sender, amount);
     }
 
-    function attack(uint256 amount, address team) public {
+    function attack(uint256 amount, address team) external {
         require(open, "Game closed");
         require(season > 0, "Season 0");
         require(players[msg.sender].season == season, "Player not joined");
@@ -450,7 +450,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         players[requests[requestId].requester].numBoosterPacks += requests[requestId].grades.length;
         emit ReceivedBoosterPack(requests[requestId].requester, randomness);
     }
-    function claimBoosterPacks() public payable {
+    function claimBoosterPacks() external payable {
         require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs");
         require(msg.value == redeemFee, "Fee required");
         devPool += redeemFee;
@@ -461,7 +461,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         // Reset player unclaimed packs
         players[msg.sender].unclaimedPacks = new uint8[](0);
     }
-    function unpackBoosterPack() public {
+    function unpackBoosterPack() external {
         uint numPacks = players[msg.sender].boosterPacks.length;
         require(numPacks > 0, "No booster packs");
         bytes32 requestId = players[msg.sender].boosterPacks[numPacks-1];
@@ -542,7 +542,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         return uint8(uint256(keccak256(abi.encodePacked(seed, nonce))) % (max+1));
     }
 
-    function forgeLegendary(uint256[] calldata ids) public {
+    function forgeLegendary(uint256[] calldata ids) external {
         (uint16 cardSet, uint8 _number) = rewardNFT.metadataOf(ids[0]);
         require(_number == 1, "First card != 1");
         uint8 totalCards = rewardNFT.totalCardsOf(cardSet);
@@ -583,7 +583,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit PoolOpened(season, rewardPools[season].remainingClaims, rewardPools[season].balance, rewardPools[season].rewardPerNFT);
     }
 
-    function claimLegendaryReward(uint256 nftId, uint16 rewardSeason) public {
+    function claimLegendaryReward(uint256 nftId, uint16 rewardSeason) external {
         require(rewardPools[rewardSeason].open == true, "Claims not open");
         require(rewardNFT.ownerOf(nftId) == msg.sender, "Not NFT owner");
         (uint16 cardSet, uint8 num) = rewardNFT.metadataOf(nftId);
@@ -600,7 +600,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit LegendaryRewardClaimed(rewardSeason, season, nftId, cardSet);
     }
 
-    function transferPoolFunds(uint16 from) public onlyOwner {
+    function transferPoolFunds(uint16 from) external onlyOwner {
         require(rewardPools[from].open == true, "From is closed");
         require(open == true, "Season closed");
         require(season > from, "Pool is current");
@@ -621,7 +621,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit ThresholdsSet(msg.sender, grade1, grade2, grade3, grade4);
     }
 
-    function setRareChance(uint8 grade2, uint8 grade3, uint8 grade4) public onlyOwner {
+    function setRareChance(uint8 grade2, uint8 grade3, uint8 grade4) external onlyOwner {
         rareChance = RareChance({
             grade2: grade2,
             grade3: grade3,
@@ -679,7 +679,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
             block.timestamp
         );
     }
-    function mintNFT(address to, uint16 set, uint8 number) public onlyOwner {
+    function mintNFT(address to, uint16 set, uint8 number) external onlyOwner {
         rewardNFT.mint(to, set, number);
         createdCards[number] += 1;
     }
