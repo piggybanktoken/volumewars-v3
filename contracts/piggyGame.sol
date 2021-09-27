@@ -441,7 +441,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
             players[msg.sender].unclaimedPacks.push(2);
         } else if (amount < thresholds[teamAddress].grade4) {
             players[msg.sender].unclaimedPacks.push(3);
-        } else if (amount > thresholds[teamAddress].grade4) {
+        } else if (amount >= thresholds[teamAddress].grade4) {
             players[msg.sender].unclaimedPacks.push(4);
         }
     }
