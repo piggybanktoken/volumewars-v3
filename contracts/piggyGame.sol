@@ -197,8 +197,8 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     function boosterPackBalanceOf(address _player) external view returns(uint256){
         return players[_player].numBoosterPacks;
     }
-    function totalGamesPlayedOf(address _player) external view returns(uint256){
-        return players[_player].gamesPlayed;
+    function totalExperienceOf(address _player) external view returns(uint256){
+        return players[_player].experience;
     }
     function teamOf(address _player) external view returns(address){
         return players[_player].team;
@@ -298,6 +298,9 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     function setRedeemFee(uint256 _fee) external onlyOwner {
         redeemFee = _fee;
     }
+    function setTeamEnabled(address teamAddress, bool enabled) external onlyOwner {
+        teams[teamAddress].enabled = enabled;
+    }
     /**
      * @dev Update the swap router.
      * Can only be called by the current operator.
@@ -334,6 +337,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         require(open, "Game closed");
         require(msg.value > 0, "No BNB");
         require(players[msg.sender].team != address(0), "User not in team");
+        require(teams[players[msg.sender].team].enabled, "Own Team disabled");
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 initialETHBalance = address(this).balance;
         uint256 initialTokenBalance = teamToken.balanceOf(address(this));
@@ -348,20 +352,21 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         require(address(this).balance >= initialETHBalance);
         emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
-    function deposit(uint256 amount) external {
-        require(open, "Game closed");
-        require(players[msg.sender].team != address(0), "User not in team");
-        IBEP20 teamToken = IBEP20(players[msg.sender].team);
-        uint256 tokenbalance = teamToken.balanceOf(msg.sender);
-        require(tokenbalance >= amount, "Insufficient funds");
-        uint256 previousBalance = teamToken.balanceOf(address(this));
-        // Transfer tokens to the game contract
-        teamToken.transferFrom(msg.sender, address(this), amount);
-        uint256 currentBalance = teamToken.balanceOf(address(this));
-        require(currentBalance > previousBalance, "Negative Increase");
-        balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
-        emit Deposit(msg.sender, amount);
-    }
+
+    // function deposit(uint256 amount) external {
+    //     require(open, "Game closed");
+    //     require(players[msg.sender].team != address(0), "User not in team");
+    //     IBEP20 teamToken = IBEP20(players[msg.sender].team);
+    //     uint256 tokenbalance = teamToken.balanceOf(msg.sender);
+    //     require(tokenbalance >= amount, "Insufficient funds");
+    //     uint256 previousBalance = teamToken.balanceOf(address(this));
+    //     // Transfer tokens to the game contract
+    //     teamToken.transferFrom(msg.sender, address(this), amount);
+    //     uint256 currentBalance = teamToken.balanceOf(address(this));
+    //     require(currentBalance > previousBalance, "Negative Increase");
+    //     balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
+    //     emit Deposit(msg.sender, amount);
+    // }
 
     function withdraw(uint256 amount) external {
         require(balances[msg.sender] >= amount, "Insuff. balance");
@@ -381,6 +386,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         require(players[msg.sender].team != team, "Friendly Fire");
         require(players[msg.sender].team != address(0), "Not on a team");
         require(teams[team].enabled, "Team invalid");
+        require(teams[players[msg.sender].team].enabled, "Own Team disabled");
         require(balances[msg.sender] >= amount, "Insuff. balance");
         // The team's corresponding token
         IBEP20 teamToken = IBEP20(players[msg.sender].team);

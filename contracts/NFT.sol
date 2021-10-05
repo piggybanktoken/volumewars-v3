@@ -31,7 +31,7 @@ contract piggyNFT is
         uint8 totalCards;
         bool enabled;
     }
-
+    mapping(uint16 => mapping(uint8 => string)) setURIs;
     mapping(uint16 => SetMetadata) sets;
 
     /**
@@ -44,7 +44,7 @@ contract piggyNFT is
     constructor(
         address game
     ) ERC721("VolumeWars NFT", "VW") {
-        _baseTokenURI = "volumewars-";
+        _baseTokenURI = "ipfs://";
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
@@ -70,6 +70,22 @@ contract piggyNFT is
         sets[set].enabled = true;
     }
 
+    function setMetadataURI(uint16 set, uint8 number, string calldata uri) public {
+        require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to edit sets");
+        require(sets[set].enabled, "Set does not exist");
+        setURIs[set][number] = uri;
+    }
+    function setBaseTokenURI(string calldata uri) public {
+        require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to add sets");
+        _baseTokenURI = uri;
+    }
+
+    function tokenURI(uint256 _tokenId) public view override returns (string memory) {
+
+        return string(abi.encodePacked(_baseTokenURI, 
+        
+        setURIs[metadata[_tokenId].set][metadata[_tokenId].number]));
+    }
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
     }
