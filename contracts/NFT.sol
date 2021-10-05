@@ -72,7 +72,7 @@ contract piggyNFT is
 
     function setMetadataURI(uint16 set, uint8 number, string calldata uri) public {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to edit sets");
-        require(sets[set].enabled, "Set does not exist");
+        // We do not check if the set exists, because we want to set metadata in advance of sets being created.
         setURIs[set][number] = uri;
     }
     function setBaseTokenURI(string calldata uri) public {
