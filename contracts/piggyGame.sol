@@ -118,6 +118,8 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
     uint256 redeemFee;
 
+    address feeDestination;
+
     // constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
     //  {
     //     _setOwner(_msgSender());
@@ -155,7 +157,11 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         // minPiggy = 10 * 10**8 * 10**9;
         // redeemFee = 2000000000000000;
         // open = false;
+        feeDestination = msg.sender;
         OwnableUpgradeable.__Ownable_init_unchained();
+        joinFee = 10000000000000000;
+        minPiggy = 1000000000000000000;
+        redeemFee = 2000000000000000;
         addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
         addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
     }
@@ -184,6 +190,12 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
     function getJoinFee() external view returns (uint256) {
         return joinFee;
+    }
+    function getRedeemFee() external view returns (uint256) {
+        return redeemFee;
+    }
+    function getMinPiggy() external view returns (uint256) {
+        return minPiggy;
     }
     function isGameOpen() external view returns (bool) {
         return open;
@@ -279,24 +291,24 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         setThresholds(teamTokenAddress, grade1, grade2, grade3, grade4);
         emit TeamAdded(msg.sender, teamTokenAddress);
     }
-
-    function withdrawAllDevETH(address payable _to) external onlyOwner {
+    function withdrawAllDevETH(address payable _to) external {
         require(devPool > 0, "No funds");
+        require(msg.sender == feeDestination);
         uint256 withdrawAmount = devPool;
         devPool = 0;
         _to.transfer(withdrawAmount);
     }
+    function changeFeeDestination(address newFeeDestination) external {
+        require(msg.sender == feeDestination);
+        feeDestination = newFeeDestination;
+    }
     function withdrawLink(address payable _to, uint256 amount) external onlyOwner {
         LINK.transfer(_to, amount);
     }
-    function setJoinFee(uint256 _fee) external onlyOwner {
-        joinFee = _fee;
-    }
-    function setJoinPiggy(uint256 _amount) external onlyOwner {
-        minPiggy = _amount;
-    }
-    function setRedeemFee(uint256 _fee) external onlyOwner {
-        redeemFee = _fee;
+    function setFeesAndJoinReq(uint256 newJoinFee, uint256 newMinPiggy, uint256 newRedeemFee) external onlyOwner {
+        joinFee = newJoinFee;
+        minPiggy = newMinPiggy;
+        redeemFee = newRedeemFee;
     }
     function setTeamEnabled(address teamAddress, bool enabled) external onlyOwner {
         teams[teamAddress].enabled = enabled;
