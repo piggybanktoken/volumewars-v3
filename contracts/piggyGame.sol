@@ -153,10 +153,6 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
             grade3: 10, // 1 in 10 Chance
             grade4: 5   // 1 in 5 Chance
         });
-        // joinFee = 10000000000000000;
-        // minPiggy = 100000 * 10**9;
-        // redeemFee = 2000000000000000;
-        // open = false;
         feeDestination = msg.sender;
         OwnableUpgradeable.__Ownable_init_unchained();
         joinFee = 10000000000000000;
