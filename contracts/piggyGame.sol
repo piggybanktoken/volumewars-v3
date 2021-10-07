@@ -162,7 +162,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         joinFee = 10000000000000000;
         minPiggy = 100000 * 10**9;
         redeemFee = 10000000000000000;
-        addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
+        addTeam(_piggyToken, 436337000 * 10**9, 2181670000 * 10**9, 6544950000 * 10**9,  13089600000 * 10**9);
         addTeam(_secondToken, 1500200000 * 10**9, 3000400000 * 10**9, 10001000000 * 10**9, 20002000000 * 10**9);
     }
 
