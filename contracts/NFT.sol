@@ -31,7 +31,6 @@ contract piggyNFT is
         uint8 totalCards;
         bool enabled;
     }
-    mapping(uint16 => mapping(uint8 => string)) setURIs;
     mapping(uint16 => SetMetadata) sets;
 
     /**
@@ -69,22 +68,13 @@ contract piggyNFT is
         sets[set].totalCards = number;
         sets[set].enabled = true;
     }
-
-    function setMetadataURI(uint16 set, uint8 number, string calldata uri) public {
-        require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to edit sets");
-        // We do not check if the set exists, because we want to set metadata in advance of sets being created.
-        setURIs[set][number] = uri;
-    }
     function setBaseTokenURI(string calldata uri) public {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to add sets");
         _baseTokenURI = uri;
     }
 
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-
-        return string(abi.encodePacked(_baseTokenURI, 
-        
-        setURIs[metadata[_tokenId].set][metadata[_tokenId].number]));
+        return string(abi.encodePacked(_baseTokenURI, "/", metadata[_tokenId].set, "/", metadata[_tokenId].number, ".json"));
     }
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
