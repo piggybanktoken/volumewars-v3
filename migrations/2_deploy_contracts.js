@@ -1,4 +1,4 @@
-const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const piggyGame = artifacts.require("piggyGame")
 const rewardNFT = artifacts.require("piggyNFT")
@@ -50,16 +50,15 @@ module.exports = async (deployer, network, [defaultAccount]) => {
     await deployedGame.updateNFTAddress(rewardNFT.address);
     return;
   }
+  // Mainnet deployment
   if (network.startsWith('mainnet')) {
     const instance = await deployProxy(piggyGame, [MAINNET_PIGGY, MAINNET_MILK, MAINNET_PCS, MAINNET_LINK.coordinator, MAINNET_LINK.token, MAINNET_LINK.hash, MAINNET_LINK.fee], { deployer });
-    // const deployedGame = await instance.contract.methods;
-    // await deployedGame.setJoinFee("10000000000000000");
-    // "1 000 000 000 000 000 000"
-    // await deployedGame.setJoinPiggy("1000000000000000000");
-    // await deployedGame.setRedeemFee("2000000000000000");
-    // await deployedGame.setRareChance(30, 10, 5);
     await deployer.deploy(rewardNFT, instance.address)
-    // await deployedGame.updateNFTAddress(rewardNFT.address);
     return;
   }
+  // For upgrades uncomment this and comment the previous part
+  // if (network.startsWith('mainnet')) {
+  //   await upgradeProxy("0xd843Bd907AAa4d8C310daA4373E4158EDedfD6e9", piggyGame, { deployer });
+  //   return;
+  // }
 }
