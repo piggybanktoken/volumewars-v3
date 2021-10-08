@@ -149,17 +149,22 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
 
         rareChance = RareChance({
-            grade2: 30, // 1 in 30 Chance
+            grade2: 60, // 1 in 30 Chance
             grade3: 10, // 1 in 10 Chance
             grade4: 5   // 1 in 5 Chance
         });
         feeDestination = msg.sender;
         OwnableUpgradeable.__Ownable_init_unchained();
         joinFee = 10000000000000000;
-        minPiggy = 100000 * 10**9;
+        minPiggy = 0 * 10**9;
         redeemFee = 10000000000000000;
-        addTeam(_piggyToken, 436337000 * 10**9, 2181670000 * 10**9, 6544950000 * 10**9,  13089600000 * 10**9);
-        addTeam(_secondToken, 1500200000 * 10**9, 3000400000 * 10**9, 10001000000 * 10**9, 20002000000 * 10**9);
+        // Loss target: 0.003, 0.01, 0.06, 0.12 BNB
+
+        // 0.01 BNB, 0.03 BNB, 0.18 BNB, 0.36 BNB
+        addTeam(_piggyToken, 2182910000 * 10**9, 6548650000 * 10**9, 39288500000 * 10**9,  78568700000 * 10**9);
+
+        // 0.018 BNB, 0.08 BNB, 0.48 BNB, 0.96 BNB
+        addTeam(_secondToken, 5809940000 * 10**9, 25563400000 * 10**9, 144074000000 * 10**9, 268593000000 * 10**9);
     }
 
     event SeasonClose(address indexed owner, uint32 indexed season, address indexed winner);
