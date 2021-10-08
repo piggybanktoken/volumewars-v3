@@ -52,8 +52,8 @@ module.exports = async (deployer, network, [defaultAccount]) => {
   }
   // Mainnet deployment
   if (network.startsWith('mainnet')) {
-    const instance = await deployProxy(piggyGame, [MAINNET_PIGGY, MAINNET_MILK, MAINNET_PCS, MAINNET_LINK.coordinator, MAINNET_LINK.token, MAINNET_LINK.hash, MAINNET_LINK.fee], { deployer });
-    await deployer.deploy(rewardNFT, instance.address)
+    // const instance = await deployProxy(piggyGame, [MAINNET_PIGGY, MAINNET_MILK, MAINNET_PCS, MAINNET_LINK.coordinator, MAINNET_LINK.token, MAINNET_LINK.hash, MAINNET_LINK.fee], { deployer });
+    await deployer.deploy(rewardNFT, "0x048F4Bea03d6d82A30DdFF29bf6B58f17Ad6B407")
     return;
   }
   // For upgrades uncomment this and comment the previous part

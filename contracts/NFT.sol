@@ -43,13 +43,14 @@ contract piggyNFT is
     constructor(
         address game
     ) ERC721("VolumeWars NFT", "VW") {
-        _baseTokenURI = "ipfs://";
+        _baseTokenURI = "ipfs://test";
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
         grantRole(MINTER_ROLE, game);
+        addSet(1, 7); // Note: Remove if redeploying
     }
 
     function metadataOf(uint256 id) external view returns (uint16, uint8) {
@@ -62,7 +63,7 @@ contract piggyNFT is
     function totalCardsOf(uint16 id) external view returns (uint8) {
         return sets[id].totalCards;
     }
-    function addSet(uint16 set, uint8 number) external {
+    function addSet(uint16 set, uint8 number) public {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to add sets");
         require(sets[set].enabled == false, "Set already exists");
         sets[set].totalCards = number;
@@ -74,7 +75,7 @@ contract piggyNFT is
     }
 
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-        return string(abi.encodePacked(_baseTokenURI, "/", metadata[_tokenId].set, "/", metadata[_tokenId].number, ".json"));
+        return string(abi.encodePacked(_baseTokenURI, "/", uintToString(metadata[_tokenId].set), "/", uintToString(metadata[_tokenId].number), ".json"));
     }
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
@@ -83,6 +84,23 @@ contract piggyNFT is
     function forgeBurn(uint256 id) external {
         require(hasRole(MINTER_ROLE, _msgSender()), "RewardNFT: must have minter role to mint");
         _burn(id);
+    }
+
+    function uintToString(uint v) internal pure returns (string memory) {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = bytes1(uint8(48 + remainder));
+        }
+        bytes memory s = new bytes(i); // i + 1 is inefficient
+        for (uint j = 0; j < i; j++) {
+            s[j] = reversed[i - j - 1]; // to avoid the off-by-one error
+        }
+        string memory str = string(s);  // memory isn't implicitly convertible to storage
+        return str;
     }
     /**
      * @dev Creates a new token for `to`. Its token ID will be automatically
