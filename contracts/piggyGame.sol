@@ -79,7 +79,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         mapping(uint256 => bool) nftsClaimed; // ID of NFTs that have already claimed this prize
     }
     // Reward pools (season -> pools)
-    mapping (uint16 => RewardPool) rewardPools;
+    mapping (uint16 => RewardPool) public rewardPools;
     
     // Thresholds for different booster pack grades
     struct Thresholds {
@@ -98,7 +98,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     }
     RareChance public rareChance;
 
-    mapping (uint8 => uint256) createdCards; // Counter for each card number created
+    mapping (uint8 => uint256) public createdCards; // Counter for each card number created
     
     bool public open;
 
@@ -111,14 +111,14 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     uint256 internal fee;
 
     // Dev rewards
-    uint256 devPool;
+    uint256 public devPool;
 
     address piggyAddress;
-    uint256 minPiggy; // Min piggy to hold in order to join
+    uint256 public minPiggy; // Min piggy to hold in order to join
 
-    uint256 redeemFee;
+    uint256 public redeemFee;
 
-    address feeDestination;
+    address public feeDestination;
 
     // constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
     //  {
