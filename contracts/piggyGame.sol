@@ -165,6 +165,9 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
         // 0.018 BNB, 0.08 BNB, 0.48 BNB, 0.96 BNB
         addTeam(_secondToken, 5809940000 * 10**9, 25563400000 * 10**9, 144074000000 * 10**9, 268593000000 * 10**9);
+
+        // Monsta
+        // 2397 27993 167958 335916
     }
 
     event SeasonClose(address indexed owner, uint32 indexed season, address indexed winner);
@@ -478,6 +481,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit ReceivedBoosterPack(requests[requestId].requester, randomness);
     }
     function claimBoosterPacks() external payable {
+        require(open, "Closed");
         require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs");
         require(msg.value == redeemFee, "Fee required");
         devPool += redeemFee;
@@ -489,6 +493,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         players[msg.sender].unclaimedPacks = new uint8[](0);
     }
     function unpackBoosterPack() external {
+        require(open, "Closed");
         uint numPacks = players[msg.sender].boosterPacks.length;
         require(numPacks > 0, "No booster packs");
         bytes32 requestId = players[msg.sender].boosterPacks[numPacks-1];
@@ -706,8 +711,8 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
             block.timestamp
         );
     }
-    function mintNFT(address to, uint16 set, uint8 number) external onlyOwner {
-        rewardNFT.mint(to, set, number);
-        createdCards[number] += 1;
-    }
+    // function mintNFT(address to, uint16 set, uint8 number) external onlyOwner {
+    //     rewardNFT.mint(to, set, number);
+    //     createdCards[number] += 1;
+    // }
 }
