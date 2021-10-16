@@ -484,7 +484,10 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         require(open, "Closed");
         require(players[msg.sender].unclaimedPacks.length > 0, "No booster packs");
         require(msg.value == redeemFee, "Fee required");
-        devPool += redeemFee;
+        uint256 userDeposit = msg.value;
+        devPool += userDeposit/2;
+        userDeposit -= userDeposit/2;
+        rewardPools[season].balance += userDeposit;
         bytes32 requestId = getRandomNumber();
         requests[requestId].requester = msg.sender;
         requests[requestId].fulfilled = false;
