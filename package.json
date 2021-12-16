@@ -33,6 +33,6 @@
     "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
-    "truffle-plugin-verify": "^0.5.11"
+    "truffle-plugin-verify": "^0.5.20"
   }
 }

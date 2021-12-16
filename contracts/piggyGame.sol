@@ -113,23 +113,6 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
     address public feeDestination;
 
-    // constructor(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee)
-    //  {
-    //     _setOwner(_msgSender());
-    //     vrfCoordinator = _coordinator;
-    //     LINK = LinkTokenInterface(_linkToken);
-
-    //     keyHash = _hash;
-    //     fee = _fee;
-    //     pancakeSwapRouter = IUniswapV2Router02(_router);
-    //     piggyAddress = _piggyToken;
-    //     linkAddress = _linkToken;
-
-    //     addTeam(_piggyToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
-
-    //     addTeam(_secondToken, 1 * 10**9 * 10**9, 2 * 10**9 * 10**9, 3 * 10**9 * 10**9,  5 * 10**9 * 10**9);
-    // }
-
     function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) external initializer {
 
         vrfCoordinator = _coordinator;
