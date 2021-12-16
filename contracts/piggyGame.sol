@@ -371,21 +371,6 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         emit TokensPurchased(msg.sender, finalTokenBalance - initialTokenBalance, minTokens, msg.value);
     }
 
-    // function deposit(uint256 amount) external {
-    //     require(open, "Game closed");
-    //     require(players[msg.sender].team != address(0), "User not in team");
-    //     IBEP20 teamToken = IBEP20(players[msg.sender].team);
-    //     uint256 tokenbalance = teamToken.balanceOf(msg.sender);
-    //     require(tokenbalance >= amount, "Insufficient funds");
-    //     uint256 previousBalance = teamToken.balanceOf(address(this));
-    //     // Transfer tokens to the game contract
-    //     teamToken.transferFrom(msg.sender, address(this), amount);
-    //     uint256 currentBalance = teamToken.balanceOf(address(this));
-    //     require(currentBalance > previousBalance, "Negative Increase");
-    //     balances[msg.sender] = balances[msg.sender] + (currentBalance - previousBalance);
-    //     emit Deposit(msg.sender, amount);
-    // }
-
     function withdraw(uint256 amount) external {
         require(balances[msg.sender] >= amount, "Insuff. balance");
         require(players[msg.sender].team != address(0), "Not in team");
