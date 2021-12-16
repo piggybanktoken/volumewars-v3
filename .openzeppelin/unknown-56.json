@@ -2394,6 +2394,752 @@
           }
         }
       }
+    },
+    "1451914f7fdc1d6925afd53b6abf818af53e41dbcbf52ca5575d425a4a4835f5": {
+      "address": "0xcD5a809d62b0Af5c51C2Ce040eF8923faA695515",
+      "txHash": "0xd39237b95726da9e0814c44189e76e6bafa029b4fabba054020cd0c939c66ec2",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:26"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "ProxySafeVRFConsumerBase",
+            "label": "LINK",
+            "type": "t_contract(LinkTokenInterface)144",
+            "src": "..\\project:\\contracts\\ProxySafeVRFConsumerBase.sol:87"
+          },
+          {
+            "contract": "ProxySafeVRFConsumerBase",
+            "label": "vrfCoordinator",
+            "type": "t_address",
+            "src": "..\\project:\\contracts\\ProxySafeVRFConsumerBase.sol:88"
+          },
+          {
+            "contract": "ProxySafeVRFConsumerBase",
+            "label": "nonces",
+            "type": "t_mapping(t_bytes32,t_uint256)",
+            "src": "..\\project:\\contracts\\ProxySafeVRFConsumerBase.sol:93"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rewardNFT",
+            "type": "t_contract(IRewardNFT)4916",
+            "src": "..\\project:\\contracts\\piggyGame.sol:25"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "pancakeSwapRouter",
+            "type": "t_contract(IUniswapV2Router02)4146",
+            "src": "..\\project:\\contracts\\piggyGame.sol:28"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "requests",
+            "type": "t_mapping(t_bytes32,t_struct(ChainlinkRequest)4936_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:38"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "players",
+            "type": "t_mapping(t_address,t_struct(Player)4966_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:56"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "teams",
+            "type": "t_mapping(t_address,t_struct(Team)4978_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:65"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "activeTeams",
+            "type": "t_array(t_address)dyn_storage",
+            "src": "..\\project:\\contracts\\piggyGame.sol:67"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:70"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rewardPools",
+            "type": "t_mapping(t_uint16,t_struct(RewardPool)5003_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:80"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rewardThresholds",
+            "type": "t_struct(Thresholds)5017_storage",
+            "src": "..\\project:\\contracts\\piggyGame.sol:90"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rareChance",
+            "type": "t_struct(RareChance)5027_storage",
+            "src": "..\\project:\\contracts\\piggyGame.sol:97"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "createdCards",
+            "type": "t_mapping(t_uint8,t_uint256)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:99"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "open",
+            "type": "t_bool",
+            "src": "..\\project:\\contracts\\piggyGame.sol:101"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "season",
+            "type": "t_uint16",
+            "src": "..\\project:\\contracts\\piggyGame.sol:103"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "keyHash",
+            "type": "t_bytes32",
+            "src": "..\\project:\\contracts\\piggyGame.sol:106"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "fee",
+            "type": "t_uint256",
+            "src": "..\\project:\\contracts\\piggyGame.sol:107"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "devPool",
+            "type": "t_uint256",
+            "src": "..\\project:\\contracts\\piggyGame.sol:110"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "redeemFee",
+            "type": "t_uint256",
+            "src": "..\\project:\\contracts\\piggyGame.sol:112"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "feeDestination",
+            "type": "t_address",
+            "src": "..\\project:\\contracts\\piggyGame.sol:114"
+          }
+        ],
+        "types": {
+          "t_contract(IRewardNFT)4916": {
+            "label": "contract IRewardNFT"
+          },
+          "t_contract(IUniswapV2Router02)4146": {
+            "label": "contract IUniswapV2Router02"
+          },
+          "t_mapping(t_bytes32,t_struct(ChainlinkRequest)4936_storage)": {
+            "label": "mapping(bytes32 => struct piggyGame.ChainlinkRequest)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(ChainlinkRequest)4936_storage": {
+            "label": "struct piggyGame.ChainlinkRequest",
+            "members": [
+              {
+                "label": "requester",
+                "type": "t_address"
+              },
+              {
+                "label": "fulfilled",
+                "type": "t_bool"
+              },
+              {
+                "label": "grades",
+                "type": "t_array(t_uint8)dyn_storage"
+              },
+              {
+                "label": "seed",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint8)dyn_storage": {
+            "label": "uint8[]"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_struct(Player)4966_storage)": {
+            "label": "mapping(address => struct piggyGame.Player)"
+          },
+          "t_struct(Player)4966_storage": {
+            "label": "struct piggyGame.Player",
+            "members": [
+              {
+                "label": "gamesPlayed",
+                "type": "t_uint256"
+              },
+              {
+                "label": "season",
+                "type": "t_uint16"
+              },
+              {
+                "label": "team",
+                "type": "t_address"
+              },
+              {
+                "label": "winsBeforeJoin",
+                "type": "t_uint32"
+              },
+              {
+                "label": "experience",
+                "type": "t_uint256"
+              },
+              {
+                "label": "boosterPacks",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "numBoosterPacks",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unclaimedPacks",
+                "type": "t_array(t_uint8)dyn_storage"
+              }
+            ]
+          },
+          "t_uint16": {
+            "label": "uint16"
+          },
+          "t_uint32": {
+            "label": "uint32"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_address,t_struct(Team)4978_storage)": {
+            "label": "mapping(address => struct piggyGame.Team)"
+          },
+          "t_struct(Team)4978_storage": {
+            "label": "struct piggyGame.Team",
+            "members": [
+              {
+                "label": "enabled",
+                "type": "t_bool"
+              },
+              {
+                "label": "wins",
+                "type": "t_uint32"
+              },
+              {
+                "label": "damagePoints",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_uint16,t_struct(RewardPool)5003_storage)": {
+            "label": "mapping(uint16 => struct piggyGame.RewardPool)"
+          },
+          "t_struct(RewardPool)5003_storage": {
+            "label": "struct piggyGame.RewardPool",
+            "members": [
+              {
+                "label": "balance",
+                "type": "t_uint256"
+              },
+              {
+                "label": "remainingClaims",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardPerNFT",
+                "type": "t_uint256"
+              },
+              {
+                "label": "open",
+                "type": "t_bool"
+              },
+              {
+                "label": "nftsClaimed",
+                "type": "t_mapping(t_uint256,t_bool)"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_struct(Thresholds)5017_storage": {
+            "label": "struct piggyGame.Thresholds",
+            "members": [
+              {
+                "label": "grade1",
+                "type": "t_uint256"
+              },
+              {
+                "label": "grade2",
+                "type": "t_uint256"
+              },
+              {
+                "label": "grade3",
+                "type": "t_uint256"
+              },
+              {
+                "label": "grade4",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_struct(RareChance)5027_storage": {
+            "label": "struct piggyGame.RareChance",
+            "members": [
+              {
+                "label": "grade2",
+                "type": "t_uint8"
+              },
+              {
+                "label": "grade3",
+                "type": "t_uint8"
+              },
+              {
+                "label": "grade4",
+                "type": "t_uint8"
+              }
+            ]
+          },
+          "t_mapping(t_uint8,t_uint256)": {
+            "label": "mapping(uint8 => uint256)"
+          },
+          "t_contract(LinkTokenInterface)144": {
+            "label": "contract LinkTokenInterface"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "9a0c101afe91b06ceb799d4bb25a61e784d973e1cf6009f5d1d00cd2502c0245": {
+      "address": "0x047dF1968aFc92A1DCcD395751Aa30B56e9B0E02",
+      "txHash": "0x562348e0b086be3a14668ebd461c02fe846b028e3ceb8268b41a3f1721f2be97",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:26"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "ProxySafeVRFConsumerBase",
+            "label": "LINK",
+            "type": "t_contract(LinkTokenInterface)144",
+            "src": "..\\project:\\contracts\\ProxySafeVRFConsumerBase.sol:87"
+          },
+          {
+            "contract": "ProxySafeVRFConsumerBase",
+            "label": "vrfCoordinator",
+            "type": "t_address",
+            "src": "..\\project:\\contracts\\ProxySafeVRFConsumerBase.sol:88"
+          },
+          {
+            "contract": "ProxySafeVRFConsumerBase",
+            "label": "nonces",
+            "type": "t_mapping(t_bytes32,t_uint256)",
+            "src": "..\\project:\\contracts\\ProxySafeVRFConsumerBase.sol:93"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rewardNFT",
+            "type": "t_contract(IRewardNFT)4916",
+            "src": "..\\project:\\contracts\\piggyGame.sol:25"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "pancakeSwapRouter",
+            "type": "t_contract(IUniswapV2Router02)4146",
+            "src": "..\\project:\\contracts\\piggyGame.sol:28"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "requests",
+            "type": "t_mapping(t_bytes32,t_struct(ChainlinkRequest)4936_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:38"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "players",
+            "type": "t_mapping(t_address,t_struct(Player)4966_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:56"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "teams",
+            "type": "t_mapping(t_address,t_struct(Team)4978_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:65"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "activeTeams",
+            "type": "t_array(t_address)dyn_storage",
+            "src": "..\\project:\\contracts\\piggyGame.sol:67"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:70"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rewardPools",
+            "type": "t_mapping(t_uint16,t_struct(RewardPool)5003_storage)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:80"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rewardThresholds",
+            "type": "t_struct(Thresholds)5017_storage",
+            "src": "..\\project:\\contracts\\piggyGame.sol:90"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "rareChance",
+            "type": "t_struct(RareChance)5027_storage",
+            "src": "..\\project:\\contracts\\piggyGame.sol:97"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "createdCards",
+            "type": "t_mapping(t_uint8,t_uint256)",
+            "src": "..\\project:\\contracts\\piggyGame.sol:99"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "open",
+            "type": "t_bool",
+            "src": "..\\project:\\contracts\\piggyGame.sol:101"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "season",
+            "type": "t_uint16",
+            "src": "..\\project:\\contracts\\piggyGame.sol:103"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "keyHash",
+            "type": "t_bytes32",
+            "src": "..\\project:\\contracts\\piggyGame.sol:106"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "fee",
+            "type": "t_uint256",
+            "src": "..\\project:\\contracts\\piggyGame.sol:107"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "devPool",
+            "type": "t_uint256",
+            "src": "..\\project:\\contracts\\piggyGame.sol:110"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "redeemFee",
+            "type": "t_uint256",
+            "src": "..\\project:\\contracts\\piggyGame.sol:112"
+          },
+          {
+            "contract": "piggyGame",
+            "label": "feeDestination",
+            "type": "t_address",
+            "src": "..\\project:\\contracts\\piggyGame.sol:114"
+          }
+        ],
+        "types": {
+          "t_contract(IRewardNFT)4916": {
+            "label": "contract IRewardNFT"
+          },
+          "t_contract(IUniswapV2Router02)4146": {
+            "label": "contract IUniswapV2Router02"
+          },
+          "t_mapping(t_bytes32,t_struct(ChainlinkRequest)4936_storage)": {
+            "label": "mapping(bytes32 => struct piggyGame.ChainlinkRequest)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(ChainlinkRequest)4936_storage": {
+            "label": "struct piggyGame.ChainlinkRequest",
+            "members": [
+              {
+                "label": "requester",
+                "type": "t_address"
+              },
+              {
+                "label": "fulfilled",
+                "type": "t_bool"
+              },
+              {
+                "label": "grades",
+                "type": "t_array(t_uint8)dyn_storage"
+              },
+              {
+                "label": "seed",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint8)dyn_storage": {
+            "label": "uint8[]"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_struct(Player)4966_storage)": {
+            "label": "mapping(address => struct piggyGame.Player)"
+          },
+          "t_struct(Player)4966_storage": {
+            "label": "struct piggyGame.Player",
+            "members": [
+              {
+                "label": "gamesPlayed",
+                "type": "t_uint256"
+              },
+              {
+                "label": "season",
+                "type": "t_uint16"
+              },
+              {
+                "label": "team",
+                "type": "t_address"
+              },
+              {
+                "label": "winsBeforeJoin",
+                "type": "t_uint32"
+              },
+              {
+                "label": "experience",
+                "type": "t_uint256"
+              },
+              {
+                "label": "boosterPacks",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "numBoosterPacks",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unclaimedPacks",
+                "type": "t_array(t_uint8)dyn_storage"
+              }
+            ]
+          },
+          "t_uint16": {
+            "label": "uint16"
+          },
+          "t_uint32": {
+            "label": "uint32"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_address,t_struct(Team)4978_storage)": {
+            "label": "mapping(address => struct piggyGame.Team)"
+          },
+          "t_struct(Team)4978_storage": {
+            "label": "struct piggyGame.Team",
+            "members": [
+              {
+                "label": "enabled",
+                "type": "t_bool"
+              },
+              {
+                "label": "wins",
+                "type": "t_uint32"
+              },
+              {
+                "label": "damagePoints",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_uint16,t_struct(RewardPool)5003_storage)": {
+            "label": "mapping(uint16 => struct piggyGame.RewardPool)"
+          },
+          "t_struct(RewardPool)5003_storage": {
+            "label": "struct piggyGame.RewardPool",
+            "members": [
+              {
+                "label": "balance",
+                "type": "t_uint256"
+              },
+              {
+                "label": "remainingClaims",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardPerNFT",
+                "type": "t_uint256"
+              },
+              {
+                "label": "open",
+                "type": "t_bool"
+              },
+              {
+                "label": "nftsClaimed",
+                "type": "t_mapping(t_uint256,t_bool)"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_struct(Thresholds)5017_storage": {
+            "label": "struct piggyGame.Thresholds",
+            "members": [
+              {
+                "label": "grade1",
+                "type": "t_uint256"
+              },
+              {
+                "label": "grade2",
+                "type": "t_uint256"
+              },
+              {
+                "label": "grade3",
+                "type": "t_uint256"
+              },
+              {
+                "label": "grade4",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_struct(RareChance)5027_storage": {
+            "label": "struct piggyGame.RareChance",
+            "members": [
+              {
+                "label": "grade2",
+                "type": "t_uint8"
+              },
+              {
+                "label": "grade3",
+                "type": "t_uint8"
+              },
+              {
+                "label": "grade4",
+                "type": "t_uint8"
+              }
+            ]
+          },
+          "t_mapping(t_uint8,t_uint256)": {
+            "label": "mapping(uint8 => uint256)"
+          },
+          "t_contract(LinkTokenInterface)144": {
+            "label": "contract LinkTokenInterface"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
     }
   }
 }

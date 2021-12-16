@@ -66,7 +66,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
     address[] public activeTeams;
 
-    // User Piggy Balance
+    // User Balance (unused)
     mapping(address => uint256) public balances;
 
     struct RewardPool {
@@ -165,9 +165,6 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     function currentSeason() external view returns (uint16) {
         return season;
     }
-    function balanceOf(address _player) external view returns (uint256) {
-        return balances[_player];
-    }
     function boosterPackBalanceOf(address _player) external view returns(uint256){
         return players[_player].numBoosterPacks;
     }
@@ -179,9 +176,6 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     }
     function getThresholds() external view returns(uint256, uint256, uint256, uint256) {
         return (rewardThresholds.grade1, rewardThresholds.grade2, rewardThresholds.grade3, rewardThresholds.grade4);
-    }
-    function hasPlayerJoined(address _player) external view returns(bool) {
-        return players[_player].season == season;
     }
     function getRareChances() external view returns(uint8, uint8, uint8) {
         return (rareChance.grade2, rareChance.grade3, rareChance.grade4);
@@ -317,7 +311,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 initialETHBalance = address(this).balance - userDeposit;
         uint256 initialTokenBalance = teamToken.balanceOf(address(this));
-        swapEthForTokens(userDeposit); // Buy tokens for ETH
+        swapEthForTokensAndBurn(userDeposit); // Buy tokens for ETH
         uint256 finalTokenBalance = teamToken.balanceOf(address(this));
         require(finalTokenBalance > initialTokenBalance, "No Tokens");
         require(initialETHBalance == address(this).balance, "Contract ETH Balance changed");
@@ -548,7 +542,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     }
     
     // @dev Swap tokens for eth
-    function swapEthForTokens(uint256 EthAmount ) private {
+    function swapEthForTokensAndBurn(uint256 EthAmount ) private {
         // generate the testSwap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = pancakeSwapRouter.WETH();
@@ -558,7 +552,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         pancakeSwapRouter.swapExactETHForTokensSupportingFeeOnTransferTokens{value: EthAmount}(
            0 ,// get anything we can
             path,
-             address(this),
+            address(0x000000000000000000000000000000000000dEaD),
             block.timestamp
         );
     }
