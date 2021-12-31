@@ -298,7 +298,7 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         uint256 userDeposit = msg.value; // msg.value: the total deposit
 
         uint256 feeTaken = userDeposit/2; // fee: the part taken as a fee, 50%
-        userDeposit -= userDeposit/2; // userDeposit: the part used for the attack
+        userDeposit -= feeTaken; // userDeposit: the part used for the attack
 
         devPool += feeTaken/2; // Half of the fee goes to the devs
         feeTaken -= feeTaken/2;
@@ -308,12 +308,8 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         // Attack
 
         // The team's corresponding token
-        IBEP20 teamToken = IBEP20(players[msg.sender].team);
         uint256 initialETHBalance = address(this).balance - userDeposit;
-        uint256 initialTokenBalance = teamToken.balanceOf(address(this));
         swapEthForTokensAndBurn(userDeposit); // Buy tokens for ETH
-        uint256 finalTokenBalance = teamToken.balanceOf(address(this));
-        require(finalTokenBalance > initialTokenBalance, "No Tokens");
         require(initialETHBalance == address(this).balance, "Contract ETH Balance changed");
 
         requestReward(msg.value);
