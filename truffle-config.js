@@ -25,9 +25,9 @@ module.exports = {
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     },
     mainnet: { // default with truffle unbox is 7545, but we can use develop to test changes, ex. truffle migrate --network develop
-      provider: () => new HDWalletProvider(mnemonic, "https://bsc-dataseed1.binance.org"),
+      provider: () => new HDWalletProvider(mnemonic, "https://bsc-dataseed1.binance.org/"),
       network_id: 56,       // Ropsten's id
-      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      confirmations: 0,    // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     }
