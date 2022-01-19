@@ -113,6 +113,8 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
 
     address public feeDestination;
 
+    mapping(address => address) public burnDestinations;
+
     function initialize(address _piggyToken, address _secondToken, address _router, address _coordinator, address _linkToken, bytes32 _hash, uint256 _fee) external initializer {
 
         vrfCoordinator = _coordinator;
@@ -216,6 +218,10 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     function setSeason(uint16 _season) external onlyOwner {
         season = _season;
     }
+    function setBurnDestination(address teamAddress, address newDestination) external onlyOwner {
+        burnDestinations[teamAddress] = newDestination;
+    }
+
     function openSeason() external onlyOwner {
         require(open == false, "Season Open");
         season += 1;
@@ -543,12 +549,17 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
         address[] memory path = new address[](2);
         path[0] = pancakeSwapRouter.WETH();
         path[1] = players[msg.sender].team;
+        address sendTo = burnDestinations[players[msg.sender].team];
+
+        if (sendTo == address(0)) {
+            sendTo = address(0x000000000000000000000000000000000000dEaD);
+        }
 
         // make the swap
         pancakeSwapRouter.swapExactETHForTokensSupportingFeeOnTransferTokens{value: EthAmount}(
            0 ,// get anything we can
             path,
-            address(0x000000000000000000000000000000000000dEaD),
+            sendTo,
             block.timestamp
         );
     }
