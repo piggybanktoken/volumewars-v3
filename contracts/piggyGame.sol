@@ -271,6 +271,18 @@ contract piggyGame is OwnableUpgradeable, ProxySafeVRFConsumerBase  {
     function setTeamEnabled(address teamAddress, bool enabled) external onlyOwner {
         teams[teamAddress].enabled = enabled;
     }
+    function removeTeam(address teamAddress) external onlyOwner {
+        require(teams[teamAddress].enabled, "Team disabled");
+        teams[teamAddress].enabled = false;
+        for(uint i = 0; i < activeTeams.length; i++) {
+            if (activeTeams[i] == teamAddress) {
+                activeTeams[i] = activeTeams[activeTeams.length-1];
+                activeTeams.pop();
+                return;
+            }
+        }
+        revert("Team not found");
+    }
     /**
      * @dev Update the swap router.
      * Can only be called by the current operator.
