@@ -15,7 +15,7 @@ contract NFTMarketplace {
 
   struct Listing {
     uint256 listingId;
-    uint256 id;
+    uint256 nftId;
     address seller;
     uint256 price;
     uint16 set;
@@ -25,16 +25,16 @@ contract NFTMarketplace {
 
   event NewListing(
     uint256 listingId,
-    uint256 id,
+    uint256 nftId,
     address indexed seller,
     uint256 price,
     uint16 indexed set,
     uint8 indexed number
   );
 
-  event Sale(uint256 listingId, uint256 indexed id, address indexed newOwner, address indexed seller);
-  event ListingCancelled(uint256 listingId, uint256 indexed id, address indexed owner);
-  event ListingPriceChanged(uint256 listingId, uint256 indexed id, address indexed owner, uint256 newPrice);
+  event Sale(uint256 listingId, uint256 indexed nftId, address indexed newOwner, address indexed seller);
+  event ListingCancelled(uint256 listingId, uint256 indexed nftId, address indexed owner);
+  event ListingPriceChanged(uint256 listingId, uint256 indexed nftId, address indexed owner, uint256 newPrice);
 
   constructor(address nftAddress, address tokenAddress) {
     nft = piggyNFT(nftAddress);
@@ -43,7 +43,7 @@ contract NFTMarketplace {
 
   function getListing(uint256 _listingId) external view returns (
       uint256 listingId,
-      uint256 id,
+      uint256 nftId,
       address seller,
       uint256 price,
       uint16 set,
@@ -54,7 +54,7 @@ contract NFTMarketplace {
     Listing storage listing = listings[_listingId];
     return (
       listing.listingId,
-      listing.id,
+      listing.nftId,
       listing.seller,
       listing.price,
       listing.set,
@@ -64,7 +64,7 @@ contract NFTMarketplace {
 
   function getListingByCard(uint16 _set, uint8 _number, uint256 index) external view returns (
       uint256 listingId,
-      uint256 id,
+      uint256 nftId,
       address seller,
       uint256 price,
       uint16 set,
@@ -75,7 +75,7 @@ contract NFTMarketplace {
     Listing storage listing = listings[cardListings[_set][_number][index]];
     return (
       listing.listingId,
-      listing.id,
+      listing.nftId,
       listing.seller,
       listing.price,
       listing.set,
@@ -85,7 +85,7 @@ contract NFTMarketplace {
 
   function getListingBySeller(address _seller, uint256 index) external view returns (
       uint256 listingId,
-      uint256 id,
+      uint256 nftId,
       address seller,
       uint256 price,
       uint16 set,
@@ -96,7 +96,7 @@ contract NFTMarketplace {
     Listing storage listing = listings[sellerListings[_seller][index]];
     return (
       listing.listingId,
-      listing.id,
+      listing.nftId,
       listing.seller,
       listing.price,
       listing.set,
@@ -118,18 +118,18 @@ contract NFTMarketplace {
     Listing storage listing = listings[listingId];
     require(listing.enabled, 'Listing disabled');
     token.transferFrom(msg.sender, listing.seller, listing.price);
-    nft.transferFrom(address(this), msg.sender, listing.id);
+    nft.transferFrom(address(this), msg.sender, listing.nftId);
     listing.enabled = false;
-    emit Sale(listingId, listing.id, msg.sender, listing.seller);
+    emit Sale(listingId, listing.nftId, msg.sender, listing.seller);
   }
 
   function cancelListing(uint256 listingId) external {
     Listing storage listing = listings[listingId];
     require(listing.seller == msg.sender, 'Not owner');
     require(listing.enabled, 'Listing disabled');
-    nft.transferFrom(address(this), msg.sender, listing.id);
+    nft.transferFrom(address(this), msg.sender, listing.nftId);
     listing.enabled = false;
-    emit ListingCancelled(listingId, listing.id, msg.sender);
+    emit ListingCancelled(listingId, listing.nftId, msg.sender);
   }
   
   function changeListingPrice(uint256 listingId, uint256 newPrice) external {
@@ -137,7 +137,7 @@ contract NFTMarketplace {
     require(listing.seller == msg.sender, 'Not owner');
     require(listing.enabled, 'Listing disabled');
     listing.price = newPrice;
-    emit ListingPriceChanged(listing.listingId, listing.id, listing.seller, newPrice);
+    emit ListingPriceChanged(listing.listingId, listing.nftId, listing.seller, newPrice);
   }
 
   fallback () external {
